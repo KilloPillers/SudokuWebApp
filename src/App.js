@@ -13,11 +13,11 @@ let initial = [
   [-1, -1, -1, -1, 3, -1, -1, 7, -1]
 ]
 
-
 function App() {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
   const [sudokuArr, setSudokuArr] = useState(initial);
   const [selected, setSelected] = useState(0)
+  const [highlight, setHighlight] = useState([])
 
   function getDeepCopy(arr) {
     return JSON.parse(JSON.stringify(arr))
@@ -31,6 +31,15 @@ function App() {
 
   function onGridButtonClick(row, col) {
     setSelected(9*row+col)
+    let row_array = [...Array(9).keys()].map(x => col+x*9);
+    let col_array = [...Array(9).keys()].map(y => y+row*9);
+    let square_array = []
+    for (let y = parseInt(row/3)*3; y < parseInt(row/3)*3+3; y++){
+      for (let x = parseInt(col/3)*3; x < parseInt(col/3)*3+3; x++) {
+        square_array.push(9*y+x)
+      }
+    }
+    setHighlight(square_array.concat(row_array, col_array))
   }
 
   return (
@@ -47,7 +56,7 @@ function App() {
                     return <td key={rIndex+cIndex} className={(col + 1) % 3 === 0 && col != 8 ? 'rBorder':'grid-cell'}>
                       <button onClick={()=>onGridButtonClick(row,col)} 
                       value={sudokuArr[row][col] === -1 ? '' : sudokuArr[row][col]} 
-                      className='cell'
+                      className={highlight.includes(9*row+col) ? 'cell-highlighted' : 'cell'}
                       disabled={initial[row][col] !== -1}
                       >{sudokuArr[row][col] === -1 ? '' : sudokuArr[row][col]}</button>
                     </td>
