@@ -13,6 +13,51 @@ let initial = [
   [-1, -1, -1, -1, 3, -1, -1, 7, -1]
 ]
 
+let solved_sudoku = false
+
+function getDeepCopy(arr) {
+  return JSON.parse(JSON.stringify(arr))
+}
+
+function isValid(digit, index){
+  for (let y = 0; y < 9; y++) { // Check Column
+    if (initial[y][index%9] === digit)
+      return false
+  }
+
+  let row = parseInt(index/9) //Check Row
+  for (let x = 0; x < 9; x++) {
+    if (initial[row][x] === digit)
+      return false
+  }
+
+  //Check 3x3 Subgrid
+  for (let y = Math.floor(Math.floor(index/9)/3)*3; y < Math.floor(Math.floor(index/9)/3)*3+3; y++){
+    for (let x = Math.floor((index%9)/3)*3; x < Math.floor((index%9)/3)*3+3; x++) {
+      if (initial[y][x] === digit)
+        return false
+    }
+  }
+  return true
+}
+
+function SolveSudoku(index){
+  if (index === 81)
+    solved_sudoku = getDeepCopy(initial)
+  for (let i = index; i < 81; i++) {
+    if (initial[parseInt(i/9)][i%9] !== -1)
+      continue //Digit is given as part of solution
+    for (let digit = 1; digit < 10; digit++) {
+      if (isValid(digit, i)) {
+        initial[parseInt(i/9)][i%9] = digit
+        SolveSudoku(i+1)
+        initial[parseInt(i/9)][i%9] = -1
+      }
+    }
+    return //No solution existed
+  }
+}
+
 function App() {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
   const [sudokuArr, setSudokuArr] = useState(initial);
@@ -30,10 +75,13 @@ function App() {
       item.textContent = (item.textContent === '' ? val:'')
     }
     else {
-      document.getElementById(selected).style.color = 'blue'
-      document.getElementById(selected).classList.toggle('isdigithighlighted', true)
       sudokuArr[Math.floor(selected/9)][selected%9] = val
       setSudokuArr(sudokuArr)
+      let cell = document.getElementById(selected)
+      cell.className = "cell-complete isdigithighlighted"
+      cell.style.color = 'blue'
+      cell.classList.toggle('ishighlighted', false)
+      cell.classList.toggle('isdigithighlighted', true)
     }
     forceUpdate()
   }
@@ -121,6 +169,13 @@ function App() {
           <button onClick={() => {
             setNotesMode(!notesMode)
           }}>Enable Notes</button>
+          <button onClick={() => {
+            if (!solved_sudoku) {
+              console.log("solving sudoku")
+              SolveSudoku(0)
+              setSudokuArr(solved_sudoku) 
+            }          
+          }}>Solve Game</button>
         </div>
       </header>
     </div>
