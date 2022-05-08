@@ -86,6 +86,14 @@ function App() {
       cell.classList.toggle('ishighlighted', false)
       cell.classList.toggle('isdigithighlighted', true)
     }
+
+    for (let i = 0; i < 81; i++) {
+      let cell = document.getElementById(i)
+      if (parseInt(cell.textContent) === val) {
+        cell.classList.toggle('ishighlighted', false)
+        cell.classList.toggle('isdigithighlighted', true)
+      }
+    }
     forceUpdate()
   }
 
@@ -144,11 +152,9 @@ function App() {
                       <button onClick={()=>onGridButtonClick(row,col)} 
                       id={9*row+col}
                       value={sudokuArr[row][col] === -1 ? '' : sudokuArr[row][col]} 
-                      className={(sudokuArr[row][col] === -1) ? 'cell' : 'cell-complete'}
-                      >{sudokuArr[row][col] === -1 ? '' : sudokuArr[row][col]}
-                        {sudokuArr[row][col] !== -1 ? '' : [1,2,3,4,5,6,7,8,9].map((i) => {
-                          return <div id={9*row+col+'-'+i} className='cell-subgrid'>{''}</div>
-                        })}
+                      className={'cell-complete'}
+                      >{sudokuArr[row][col] === -1 ? <div className='cell-note-grid'>{[1,2,3,4,5,6,7,8,9].map((i) => {
+                        return <div id={9*row+col+'-'+i} className='cell-subgrid'>{''}</div>})}</div> : sudokuArr[row][col]}
                       </button>
                     </td>
                     })}
