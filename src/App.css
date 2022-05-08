@@ -35,6 +35,10 @@
   background-color: lightblue;
 }
 
+.cell-complete.iswrong {
+  background-color: rgb(255, 147, 147);
+}
+
 .cell-complete.isselected {
   background-color: rgb(70, 179, 216);;
 }

@@ -13,7 +13,17 @@ let initial = [
   [-1, -1, -1, -1, 3, -1, -1, 7, -1]
 ]
 
-let solved_sudoku = false
+let solved_sudoku = [
+  [4, 5, 1, 9, 7, 3, 8, 6, 2],
+  [8, 9, 2, 1, 4, 6, 3, 5, 7],
+  [7, 6, 3, 2, 8, 5, 1, 9, 4],
+  [5, 3, 8, 6, 2, 7, 9, 4, 1],
+  [6, 2, 4, 3, 9, 1, 7, 8, 5],
+  [1, 7, 9, 8, 5, 4, 6, 2, 3],
+  [9, 8, 7, 4, 1, 2, 5, 3, 6],
+  [3, 4, 5, 7, 6, 8, 2, 1, 9],
+  [2, 1, 6, 5, 3, 9, 4, 7, 8]
+]
 
 function getDeepCopy(arr) {
   return JSON.parse(JSON.stringify(arr))
@@ -78,13 +88,24 @@ function App() {
       item.textContent = (item.textContent === '' ? val:'')
     }
     else {
-      sudokuArr[Math.floor(selected/9)][selected%9] = val
-      setSudokuArr(sudokuArr)
-      let cell = document.getElementById(selected)
-      cell.className = "cell-complete isdigithighlighted"
-      cell.style.color = 'blue'
-      cell.classList.toggle('ishighlighted', false)
-      cell.classList.toggle('isdigithighlighted', true)
+      if (initial[Math.floor(selected/9)][selected%9] !== solved_sudoku[Math.floor(selected/9)][selected%9]) {
+        initial[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? -1 : val
+        setSudokuArr(sudokuArr)
+        let cell = document.getElementById(selected)
+        cell.className = "cell-complete iswrong"
+        cell.style.color = 'red'
+        cell.classList.toggle('ishighlighted', false)
+        cell.classList.toggle('isdigithighlighted', true)
+      }
+      else{
+        sudokuArr[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? -1 : val
+        setSudokuArr(sudokuArr)
+        let cell = document.getElementById(selected)
+        cell.className = "cell-complete isdigithighlighted"
+        cell.style.color = 'blue'
+        cell.classList.toggle('ishighlighted', false)
+        cell.classList.toggle('isdigithighlighted', true)
+      }
     }
 
     for (let i = 0; i < 81; i++) {
@@ -180,8 +201,7 @@ function App() {
           }}>Enable Notes</button>
           <button onClick={() => {
             if (!solved_sudoku) {
-              console.log("solving sudoku")
-              SolveSudoku(0)
+              //SolveSudoku(0) 
               setSudokuArr(solved_sudoku) 
             }          
           }}>Solve Game</button>
