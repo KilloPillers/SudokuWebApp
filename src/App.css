@@ -89,6 +89,11 @@
   border: 1px solid black;
   table-layout: fixed;
   transition: 250ms;
+}
+
+.cell-note-grid {
+  width: 50px;
+  height: 50px;
   display: grid;
   grid-gap: 3px;
   grid-template-columns: 10px 10px 10px;

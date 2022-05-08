@@ -51,7 +51,10 @@ function SolveSudoku(index){
       if (isValid(digit, i)) {
         initial[parseInt(i/9)][i%9] = digit
         SolveSudoku(i+1)
-        initial[parseInt(i/9)][i%9] = -1
+        if (solved_sudoku === false)
+          initial[parseInt(i/9)][i%9] = -1
+        else 
+          return
       }
     }
     return //No solution existed
