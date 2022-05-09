@@ -82,31 +82,45 @@ function App() {
     return JSON.parse(JSON.stringify(arr))
   }
 
+  function handleKeyPress(event) {
+
+  } 
+
   function onNumberButtonClick(val) {
+    if (solved_sudoku[Math.floor(selected/9)][selected%9] === sudokuArr[Math.floor(selected/9)][selected%9])
+      return
     if (notesMode) {
       let item = document.getElementById(selected+'-'+val)
       item.textContent = (item.textContent === '' ? val:'')
     }
     else {
-      if (initial[Math.floor(selected/9)][selected%9] !== solved_sudoku[Math.floor(selected/9)][selected%9]) {
+      if (solved_sudoku[Math.floor(selected/9)][selected%9] !== val) {
         initial[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? -1 : val
-        setSudokuArr(sudokuArr)
+        //setSudokuArr(sudokuArr)
         let cell = document.getElementById(selected)
-        cell.className = "cell-complete iswrong"
-        cell.style.color = 'red'
+        if (initial[Math.floor(selected/9)][selected%9] === val) {
+          cell.classList.toggle('iswrong', true)
+        }
+        else {
+          cell.classList.toggle('iswrong', false)
+        }
         cell.classList.toggle('ishighlighted', false)
-        cell.classList.toggle('isdigithighlighted', true)
+        cell.classList.toggle('isdigithighlighted', false)
+        setSudokuArr(sudokuArr)
       }
-      else{
+      else {
         sudokuArr[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? -1 : val
         setSudokuArr(sudokuArr)
         let cell = document.getElementById(selected)
-        cell.className = "cell-complete isdigithighlighted"
-        cell.style.color = 'blue'
+        cell.classList.toggle('iswrong', false)
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', true)
       }
     }
+
+    highlight.forEach(element => {
+      document.getElementById(element).classList.toggle('ishighlighted', true)
+    })
 
     for (let i = 0; i < 81; i++) {
       let cell = document.getElementById(i)
@@ -114,6 +128,8 @@ function App() {
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', true)
       }
+      else
+        cell.classList.toggle('isdigithighlighted', false)
     }
     forceUpdate()
   }
@@ -159,7 +175,7 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div className="App" onKeyDown={handleKeyPress}>
       <header className="App-header">
         <h3>Sudoku</h3>
         <div></div>

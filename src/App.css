@@ -25,10 +25,14 @@
   border: 1px solid black;
   table-layout: fixed;
   transition: 250ms;
+  -webkit-animation: rotate-scale-up 0.65s linear both;
+  animation: rotate-scale-up 0.65s linear both;
+  animation-duration: .500ms;
 }
 
 .cell-complete.isdigithighlighted {
   background-color: rgb(70, 179, 216);
+  color: blue
 }
 
 .cell-complete.ishighlighted {
@@ -37,10 +41,11 @@
 
 .cell-complete.iswrong {
   background-color: rgb(255, 147, 147);
+  color: red;
 }
 
 .cell-complete.isselected {
-  background-color: rgb(70, 179, 216);;
+  background-color: rgb(70, 179, 216);
 }
 
 .cell:hover div{
@@ -99,7 +104,7 @@
 
 .cell-subgrid {
   font-size: 10px;
-  color: lightslategray
+  color: rgb(75, 87, 99)
 }
 
 .bBorder {
