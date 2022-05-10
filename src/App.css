@@ -79,6 +79,10 @@
   grid-template-rows: 14px 14px 14px;
 }
 
+.cell-note-grid:hover div{
+  color: white
+}
+
 .grid-table {
   width: auto;
   height: auto;

@@ -1,5 +1,9 @@
 import './App.css';
-import React, {useState, useReducer} from 'react'
+import React, {useState, useReducer, useEffect} from 'react'
+
+let selected = 0
+
+let notesMode = false
 
 let initial = [
   [-1, 5, -1, 9, -1, -1, -1, -1, -1],
@@ -24,6 +28,8 @@ let solved_sudoku = [
   [3, 4, 5, 7, 6, 8, 2, 1, 9],
   [2, 1, 6, 5, 3, 9, 4, 7, 8]
 ]
+
+let highlight = []
 
 function getDeepCopy(arr) {
   return JSON.parse(JSON.stringify(arr))
@@ -74,17 +80,15 @@ function SolveSudoku(index){
 function App() {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
   const [sudokuArr, setSudokuArr] = useState(initial);
-  const [selected, setSelected] = useState(0)
-  const [highlight, setHighlight] = useState([])
-  const [notesMode, setNotesMode] = useState()
-  
-  function getDeepCopy(arr) {
-    return JSON.parse(JSON.stringify(arr))
-  }
+  //const [highlight, setHighlight] = useState([])
 
-  function handleKeyPress(event) {
-
-  } 
+  useEffect(() => {
+    document.addEventListener('keydown', (e) => {
+      if (parseInt(e.key)) {
+        onNumberButtonClick(parseInt(e.key))
+      }
+    }, false)
+  }, [])
 
   function onNumberButtonClick(val) {
     if (solved_sudoku[Math.floor(selected/9)][selected%9] === sudokuArr[Math.floor(selected/9)][selected%9])
@@ -96,7 +100,6 @@ function App() {
     else {
       if (solved_sudoku[Math.floor(selected/9)][selected%9] !== val) {
         initial[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? -1 : val
-        //setSudokuArr(sudokuArr)
         let cell = document.getElementById(selected)
         if (initial[Math.floor(selected/9)][selected%9] === val) {
           cell.classList.toggle('iswrong', true)
@@ -137,11 +140,11 @@ function App() {
   function onGridButtonClick(row, col) {
     //Revert previously highlighted elements
     document.getElementById(selected).classList.toggle('isselected', false)
-
+    
     highlight.forEach(element => {
       document.getElementById(element).classList.toggle('ishighlighted', false)
     })
-    setSelected(9*row+col)
+    selected = (9*row+col)
     let row_array = [...Array(9).keys()].map(x => col+x*9);
     let col_array = [...Array(9).keys()].map(y => y+row*9);
     let square_array = []
@@ -153,7 +156,7 @@ function App() {
     let temp = []
     temp = temp.concat(row_array, col_array, square_array)
     let uniqueCells = [...new Set(temp)] //remove duplicates from list
-    setHighlight(uniqueCells)
+    highlight = uniqueCells
     uniqueCells.forEach(element => { //Toggle elements highlighted on grid
       document.getElementById(element).classList.toggle('ishighlighted', true)
     })
@@ -175,7 +178,7 @@ function App() {
   }
 
   return (
-    <div className="App" onKeyDown={handleKeyPress}>
+    <div className="App">
       <header className="App-header">
         <h3>Sudoku</h3>
         <div></div>
@@ -213,14 +216,14 @@ function App() {
             }
           </table>
           <button onClick={() => {
-            setNotesMode(!notesMode)
+            notesMode = !notesMode
           }}>Enable Notes</button>
           <button onClick={() => {
-            if (!solved_sudoku) {
-              //SolveSudoku(0) 
-              setSudokuArr(solved_sudoku) 
-            }          
+              setSudokuArr(solved_sudoku)      
           }}>Solve Game</button>
+          <button onClick={() => {
+              console.log(selected)      
+          }}>Test Button</button>
         </div>
       </header>
     </div>
