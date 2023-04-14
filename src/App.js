@@ -90,6 +90,24 @@ function App() {
     }, false)
   }, [])
 
+
+  function getHighlights(row, col) {
+    let selected = (9*row+col)
+    let row_array = [...Array(9).keys()].map(x => col+x*9);
+    let col_array = [...Array(9).keys()].map(y => y+row*9);
+    let square_array = []
+    for (let y = parseInt(row/3)*3; y < parseInt(row/3)*3+3; y++){
+      for (let x = parseInt(col/3)*3; x < parseInt(col/3)*3+3; x++) {
+          square_array.push(9*y+x)
+      }
+    }
+    let temp = []
+    temp = temp.concat(row_array, col_array, square_array)
+    let uniqueCells = [...new Set(temp)] //remove duplicates from list
+    console.log(uniqueCells)
+    return uniqueCells
+  }
+
   function onNumberButtonClick(val) {
     if (solved_sudoku[Math.floor(selected/9)][selected%9] === sudokuArr[Math.floor(selected/9)][selected%9])
       return
@@ -114,6 +132,11 @@ function App() {
       else {
         sudokuArr[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? -1 : val
         setSudokuArr(sudokuArr)
+        highlight.forEach(element => {
+          let item = document.getElementById(element+'-'+val)
+          if (item != null)
+            item.textContent = ''
+        })
         let cell = document.getElementById(selected)
         cell.classList.toggle('iswrong', false)
         cell.classList.toggle('ishighlighted', false)
@@ -127,7 +150,8 @@ function App() {
 
     for (let i = 0; i < 81; i++) {
       let cell = document.getElementById(i)
-      if (parseInt(cell.textContent) === val) {
+      if (parseInt(cell.value) === val) {
+        console.log(i)
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', true)
       }
@@ -180,7 +204,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h3>Sudoku</h3>
+        <h3>Sudoku v1</h3>
         <div></div>
         <table className='grid-table'>
           <tbody>
