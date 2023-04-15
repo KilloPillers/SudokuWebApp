@@ -9,7 +9,6 @@ const socket = io("http://localhost:3000", {
   }
 });
 
-
 let selected = 0
 
 let notesMode = false
@@ -40,6 +39,7 @@ let solved_sudoku = [
 
 let highlight = []
 
+/*
 function getDeepCopy(arr) {
   return JSON.parse(JSON.stringify(arr))
 }
@@ -85,45 +85,36 @@ function SolveSudoku(index){
     return //No solution existed
   }
 }
+*/
 
 function App() {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
   const [sudokuArr, setSudokuArr] = useState(initial);
   //const [highlight, setHighlight] = useState([])
 
-  socket.on("connect", () => {
-    socket.emit("custom_event", {name: "Juan", age: 25});
-  });
-  
-  socket.on("update_sudoku", (sudoku_data, socketId) => {
-    setSudokuArr(sudoku_data)
-  })
-
   useEffect(() => {
-    //connect();
+    console.log("Connecting to serer")
+    socket.on("connect", () => {
+      socket.emit("custom_event", {name: "Juan", age: 25});
+    });
+    
+    socket.on("update_sudoku", (selected, value) => {
+      sudokuArr[Math.floor(selected/9)][selected%9] = value;
+      initial[Math.floor(selected/9)][selected%9] = value;
+      let cell = document.getElementById(selected)
+      if (solved_sudoku[Math.floor(selected/9)][selected%9] === value || value === -1)
+        cell.classList.toggle('iswrong', false)
+      else
+        cell.classList.toggle('iswrong', true)
+      forceUpdate()
+    });
+
     document.addEventListener('keydown', (e) => {
       if (parseInt(e.key)) {
         onNumberButtonClick(parseInt(e.key))
       }
     }, false)
   }, [])
-
-  function getHighlights(row, col) {
-    let selected = (9*row+col)
-    let row_array = [...Array(9).keys()].map(x => col+x*9);
-    let col_array = [...Array(9).keys()].map(y => y+row*9);
-    let square_array = []
-    for (let y = parseInt(row/3)*3; y < parseInt(row/3)*3+3; y++){
-      for (let x = parseInt(col/3)*3; x < parseInt(col/3)*3+3; x++) {
-          square_array.push(9*y+x)
-      }
-    }
-    let temp = []
-    temp = temp.concat(row_array, col_array, square_array)
-    let uniqueCells = [...new Set(temp)] //remove duplicates from list
-    console.log(uniqueCells)
-    return uniqueCells
-  }
 
   function onNumberButtonClick(val) {
     if (solved_sudoku[Math.floor(selected/9)][selected%9] === sudokuArr[Math.floor(selected/9)][selected%9])
@@ -149,7 +140,7 @@ function App() {
         sudokuArr[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? -1 : val
         highlight.forEach(element => {
           let item = document.getElementById(element+'-'+val)
-          if (item != null)
+          if (item !== null)
             item.textContent = ''
         })
         let cell = document.getElementById(selected)
@@ -157,8 +148,8 @@ function App() {
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', true)
       }
-      setSudokuArr(sudokuArr)
-      socket.emit("update_sudoku", sudokuArr, socket.id)
+      //setSudokuArr(sudokuArr)
+      socket.emit("send_sudoku", selected, sudokuArr[Math.floor(selected/9)][selected%9])
     }
 
     highlight.forEach(element => {
@@ -168,7 +159,6 @@ function App() {
     for (let i = 0; i < 81; i++) {
       let cell = document.getElementById(i)
       if (parseInt(cell.value) === val) {
-        console.log(i)
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', true)
       }
@@ -227,10 +217,11 @@ function App() {
           <tbody>
             {
               [0,1,2,3,4,5,6,7,8].map((row, rIndex) => {
-                return <tr key={rIndex} className={(row + 1) % 3 === 0 && row != 8 ? 'bBorder':'grid-cell'}>
+                return <tr key={rIndex} className={(row + 1) % 3 === 0 && row !== 8 ? 'bBorder':'grid-cell'}>
                   {[0,1,2,3,4,5,6,7,8].map((col, cIndex) => {
-                    return <td key={rIndex+cIndex} className={(col + 1) % 3 === 0 && col != 8 ? 'rBorder':'grid-cell'}>
-                      <button onClick={()=>onGridButtonClick(row,col)} 
+                    return <td key={rIndex+cIndex} className={(col + 1) % 3 === 0 && col !== 8 ? 'rBorder':'grid-cell'}>
+                      <button 
+                      onClick={()=>onGridButtonClick(row,col)} 
                       id={9*row+col}
                       value={sudokuArr[row][col] === -1 ? '' : sudokuArr[row][col]} 
                       className={'cell-complete'}
