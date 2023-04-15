@@ -1,6 +1,6 @@
 import './App.css';
-import React, {useState, useReducer, useEffect} from 'react'
-import {io} from "socket.io-client"
+import React, {useState, useReducer, useEffect} from 'react';
+import {io} from "socket.io-client";
 
 const socket = io("http://localhost:3000", {
   withCredentials: true,
@@ -14,15 +14,15 @@ let selected = 0
 let notesMode = false
 
 let initial = [
-  [-1, 5, -1, 9, -1, -1, -1, -1, -1],
-  [8, -1, -1, -1, 4, -1, 3, -1, 7],
-  [-1, -1, -1, 2, 8, -1, 1, 9, -1],
-  [5, 3, 8, 6, -1, 7, 9, 4, -1],
-  [-1, 2, -1, 3, -1, 1, -1, -1, -1],
-  [1, -1, 9, 8, -1, 4, 6, 2, 3],
-  [9, -1, 7, 4, -1, -1, -1, -1, -1],
-  [-1, 4, 5, -1, -1, -1, 2, -1, 9],
-  [-1, -1, -1, -1, 3, -1, -1, 7, -1]
+  [0, 5, 0, 9, 0, 0, 0, 0, 0],
+  [8, 0, 0, 0, 4, 0, 3, 0, 7],
+  [0, 0, 0, 2, 8, 0, 1, 9, 0],
+  [5, 3, 8, 6, 0, 7, 9, 4, 0],
+  [0, 2, 0, 3, 0, 1, 0, 0, 0],
+  [1, 0, 9, 8, 0, 4, 6, 2, 3],
+  [9, 0, 7, 4, 0, 0, 0, 0, 0],
+  [0, 4, 5, 0, 0, 0, 2, 0, 9],
+  [0, 0, 0, 0, 3, 0, 0, 7, 0]
 ]
 
 let solved_sudoku = [
@@ -70,14 +70,14 @@ function SolveSudoku(index){
   if (index === 81)
     solved_sudoku = getDeepCopy(initial)
   for (let i = index; i < 81; i++) {
-    if (initial[parseInt(i/9)][i%9] !== -1)
+    if (initial[parseInt(i/9)][i%9] !== 0)
       continue //Digit is given as part of solution
     for (let digit = 1; digit < 10; digit++) {
       if (isValid(digit, i)) {
         initial[parseInt(i/9)][i%9] = digit
         SolveSudoku(i+1)
         if (solved_sudoku === false)
-          initial[parseInt(i/9)][i%9] = -1
+          initial[parseInt(i/9)][i%9] = 0
         else 
           return
       }
@@ -94,18 +94,35 @@ function App() {
 
   useEffect(() => {
     console.log("Connecting to serer")
-    socket.on("connect", () => {
-      socket.emit("custom_event", {name: "Juan", age: 25});
+    socket.on("user_connecting", (sudoku_recieved) => {
+      let parsedSudoku = sudoku_recieved.split(',')
+      let served_unsolved_sudoku = parsedSudoku[0].split("").map(Number)
+      let served_solved_sudoku = parsedSudoku[1].split("").map(Number)
+      console.log(served_unsolved_sudoku)
+      console.log(served_solved_sudoku)
+      for (let i = 0; i < 81; i++) {
+        sudokuArr[Math.floor(i/9)][i%9] = served_unsolved_sudoku[i];
+        initial[Math.floor(i/9)][i%9] = served_unsolved_sudoku[i];
+        solved_sudoku[Math.floor(i/9)][i%9] = served_solved_sudoku[i];
+        let cell = document.getElementById(i)
+        if (solved_sudoku[Math.floor(i/9)][i%9] === sudokuArr[Math.floor(i/9)][i%9] || sudokuArr[Math.floor(i/9)][i%9] === 0)
+          cell.classList.toggle('iswrong', false)
+        else
+          cell.classList.toggle('iswrong', true)
+      }
+      console.log(sudokuArr)
+      forceUpdate()
     });
     
-    socket.on("update_sudoku", (selected, value) => {
+    socket.on("sudoku_change", (selected, value) => {
       sudokuArr[Math.floor(selected/9)][selected%9] = value;
       initial[Math.floor(selected/9)][selected%9] = value;
       let cell = document.getElementById(selected)
-      if (solved_sudoku[Math.floor(selected/9)][selected%9] === value || value === -1)
+      if (solved_sudoku[Math.floor(selected/9)][selected%9] === value || value === 0)
         cell.classList.toggle('iswrong', false)
       else
         cell.classList.toggle('iswrong', true)
+      setSudokuArr(sudokuArr)
       forceUpdate()
     });
 
@@ -125,7 +142,7 @@ function App() {
     }
     else {
       if (solved_sudoku[Math.floor(selected/9)][selected%9] !== val) {
-        initial[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? -1 : val
+        initial[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? 0 : val
         let cell = document.getElementById(selected)
         if (initial[Math.floor(selected/9)][selected%9] === val) {
           cell.classList.toggle('iswrong', true)
@@ -137,7 +154,7 @@ function App() {
         cell.classList.toggle('isdigithighlighted', false)
       }
       else {
-        sudokuArr[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? -1 : val
+        sudokuArr[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? 0 : val
         highlight.forEach(element => {
           let item = document.getElementById(element+'-'+val)
           if (item !== null)
@@ -149,7 +166,7 @@ function App() {
         cell.classList.toggle('isdigithighlighted', true)
       }
       //setSudokuArr(sudokuArr)
-      socket.emit("send_sudoku", selected, sudokuArr[Math.floor(selected/9)][selected%9])
+      socket.emit("sudoku_change", selected, sudokuArr[Math.floor(selected/9)][selected%9])
     }
 
     highlight.forEach(element => {
@@ -223,9 +240,9 @@ function App() {
                       <button 
                       onClick={()=>onGridButtonClick(row,col)} 
                       id={9*row+col}
-                      value={sudokuArr[row][col] === -1 ? '' : sudokuArr[row][col]} 
+                      value={sudokuArr[row][col] === 0 ? '' : sudokuArr[row][col]} 
                       className={'cell-complete'}
-                      >{sudokuArr[row][col] === -1 ? <div className='cell-note-grid'>{[1,2,3,4,5,6,7,8,9].map((i) => {
+                      >{sudokuArr[row][col] === 0 ? <div className='cell-note-grid'>{[1,2,3,4,5,6,7,8,9].map((i) => {
                         return <div id={9*row+col+'-'+i} className='cell-subgrid'>{''}</div>})}</div> : sudokuArr[row][col]}
                       </button>
                     </td>
