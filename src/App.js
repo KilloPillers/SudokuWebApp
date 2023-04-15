@@ -1,5 +1,14 @@
 import './App.css';
 import React, {useState, useReducer, useEffect} from 'react'
+import {io} from "socket.io-client"
+
+const socket = io("http://localhost:3000", {
+  withCredentials: true,
+  extraHeaders: {
+    "my-custom-header": "abcd"
+  }
+});
+
 
 let selected = 0
 
@@ -82,14 +91,22 @@ function App() {
   const [sudokuArr, setSudokuArr] = useState(initial);
   //const [highlight, setHighlight] = useState([])
 
+  socket.on("connect", () => {
+    socket.emit("custom_event", {name: "Juan", age: 25});
+  });
+  
+  socket.on("update_sudoku", (sudoku_data, socketId) => {
+    setSudokuArr(sudoku_data)
+  })
+
   useEffect(() => {
+    //connect();
     document.addEventListener('keydown', (e) => {
       if (parseInt(e.key)) {
         onNumberButtonClick(parseInt(e.key))
       }
     }, false)
   }, [])
-
 
   function getHighlights(row, col) {
     let selected = (9*row+col)
@@ -127,11 +144,9 @@ function App() {
         }
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', false)
-        setSudokuArr(sudokuArr)
       }
       else {
         sudokuArr[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? -1 : val
-        setSudokuArr(sudokuArr)
         highlight.forEach(element => {
           let item = document.getElementById(element+'-'+val)
           if (item != null)
@@ -142,6 +157,8 @@ function App() {
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', true)
       }
+      setSudokuArr(sudokuArr)
+      socket.emit("update_sudoku", sudokuArr, socket.id)
     }
 
     highlight.forEach(element => {
