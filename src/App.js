@@ -158,7 +158,7 @@ function App() {
 
     for (let i = 0; i < 81; i++) {
       let cell = document.getElementById(i)
-      if (parseInt(cell.value) === val) {
+      if (parseInt(cell.value) === sudokuArr[Math.floor(selected/9)][selected%9]) {
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', true)
       }

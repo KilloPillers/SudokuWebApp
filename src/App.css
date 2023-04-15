@@ -44,9 +44,7 @@
   height: 50px;
   font-size: 30px;
   text-align: center;
-  color: black;
   padding: 0px;
-  background-color: white;
   border: 1px solid black;
   table-layout: fixed;
   transition: 250ms;

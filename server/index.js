@@ -21,9 +21,9 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
     console.log('A user connected: ', socket.id)
-    socket.on("send_sudoku", (sudoku_data, socketID) => {
+    socket.on("send_sudoku", (sudoku_data, value) => {
         //console.log("Sudoku: ", sudoku_data,  " ", socketID)
-        socket.broadcast.emit("update_sudoku", sudoku_data, socketID)
+        socket.broadcast.emit("update_sudoku", sudoku_data, value)
     })
 })
 
