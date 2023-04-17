@@ -1,3 +1,67 @@
+.ReactModal__Overlay {
+  background-color: rgba(52,53,65, 0.4);
+  width: 100%;
+  height: 100%;
+  position: inherit;
+  transform: translate(+0%,+0%);
+  transition: background-color 500ms ease-in-out;
+}
+
+.ReactModal__Body--open {
+  overflow: hidden;
+  background-color: rgba(52,53,65, 0.4);
+  transition: background-color 500ms ease-in-out;
+}
+
+.portal {
+  color:aliceblue;
+  background-color: rgba(52,53,65,1);
+  border-radius: 10px;
+  width: 25%;
+  height: 20%;
+  opacity: 1;
+  transform: translate(+150%,+125%);
+}
+
+input {
+  border-radius: 4px;
+  background-color: #40414f;
+  font-size: 100%;
+  color: aliceblue;
+  padding: 10px;
+}
+
+.ReactModal__Overlay--after-open{
+  background: rgba(52,53,65, 0.5);
+  transition: background-color 500ms ease-in-out;
+}
+
+.ReactModal__Overlay--before-close{
+  background-color: rgba(52,53,65, 0.4);
+  transition: background-color 500ms ease-in-out;
+}
+
+.ReactModalBody{
+  text-align: center;
+  transform: translate(0,-50%);
+}
+
+.ReactModalBody-header{
+  background-color: #40414f;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 250%;
+  transform: translate(0,0);
+}
+
+.ReactModalBody-footer{
+  text-align: right;
+  background-color: #40414f;
+  border-radius: 4px;
+  font-size: 250%;
+  transform: translate(0,0%);
+}
+
 .App {
   text-align: center;
   padding: 0px;

@@ -25,6 +25,8 @@ app.get('/', (req, res) => {
   res.send('<h1>Hello world</h1>');
 });
 
+app.get
+
 //puzzles[Math.floor(Math.random()*puzzles.length)]
 
 io.on('connection', (socket) => {
@@ -34,6 +36,9 @@ io.on('connection', (socket) => {
         socket.broadcast.emit("sudoku_change", sudoku_data, value)
     })
     socket.emit("user_connecting", puzzles[Math.floor(Math.random()*puzzles.length)])
+    socket.on("room-created", (data)=>{
+        console.log(data.roomName)
+    })
 })
 
 //io.emit("user_connecting", puzzles[Math.floor(Math.random()*puzzles.length)])

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Room Creation and Joining</title>
+    <style>
+      /* Center the forms on the page */
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Welcome to Room Creation and Joining</h1>
+    <h2>Create a Room</h2>
+    <form action="create_room.php" method="post">
+      <label for="room-name">Room Name:</label>
+      <input type="text" id="room-name" name="room-name" required>
+      <br>
+      <label for="password">Password (optional):</label>
+      <input type="password" id="password" name="password">
+      <br>
+      <input type="submit" value="Create Room">
+    </form>
+    <h2>Join a Room</h2>
+    <form action="join_room.php" method="post">
+      <label for="room-code">Room Code:</label>
+      <input type="text" id="room-code" name="room-code" required>
+      <br>
+      <label for="password">Password (if required):</label>
+      <input type="password" id="password" name="password">
+      <br>
+      <input type="submit" value="Join Room">
+    </form>
+  </body>
+</html>
+
+
+.ReactModal__Overlay {
+    background: #343a45;
+    width: 25%;
+    height: 50%;
+    position: inherit;
+    transform: translate(+150%,+50%);
+    opacity: 0;
+    transition: opacity 400ms ease-in-out;
+}
