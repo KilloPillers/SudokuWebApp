@@ -1,5 +1,6 @@
 import '../App.css';
 import React, {useState, useReducer, useEffect} from 'react';
+import { useLocation } from 'react-router-dom';
 import {io} from "socket.io-client";
 
 let selected = 0
@@ -84,19 +85,24 @@ function Game({socket}) {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
   const [sudokuArr, setSudokuArr] = useState(initial);
   //const [highlight, setHighlight] = useState([])
+  const location = useLocation();
+  const currentRoute = location.pathname;
+  const roomId = currentRoute.split("/")[2];
+  const roomName = "UnNamed"
 
   useEffect(() => {
     console.log("Connecting to serer")
-    this.props.socket.on("user_connecting", (sudoku_recieved) => {
-      let parsedSudoku = sudoku_recieved.split(',')
-      let served_unsolved_sudoku = parsedSudoku[0].split("").map(Number)
-      let served_solved_sudoku = parsedSudoku[1].split("").map(Number)
-      console.log(served_unsolved_sudoku)
-      console.log(served_solved_sudoku)
+    console.log(currentRoute)
+    socket.emit("join-room", roomId)
+
+    socket.on("room-data", (roomData) => {
+      roomName = roomData.name
+      console.log(roomData.solvedPuzzle)
+      console.log(roomData.unsolvedPuzzle)
       for (let i = 0; i < 81; i++) {
-        sudokuArr[Math.floor(i/9)][i%9] = served_unsolved_sudoku[i];
-        initial[Math.floor(i/9)][i%9] = served_unsolved_sudoku[i];
-        solved_sudoku[Math.floor(i/9)][i%9] = served_solved_sudoku[i];
+        sudokuArr[Math.floor(i/9)][i%9] = roomData.unsolvedPuzzle[i];
+        initial[Math.floor(i/9)][i%9] = roomData.unsolvedPuzzle[i];
+        solved_sudoku[Math.floor(i/9)][i%9] = roomData.solvedPuzzle[i];
         let cell = document.getElementById(i)
         if (solved_sudoku[Math.floor(i/9)][i%9] === sudokuArr[Math.floor(i/9)][i%9] || sudokuArr[Math.floor(i/9)][i%9] === 0)
           cell.classList.toggle('iswrong', false)
@@ -107,7 +113,7 @@ function Game({socket}) {
       forceUpdate()
     });
     
-    this.props.socket.on("sudoku_change", (selected, value) => {
+    socket.on("sudoku-change", (roomId, selected, value) => {
       sudokuArr[Math.floor(selected/9)][selected%9] = value;
       initial[Math.floor(selected/9)][selected%9] = value;
       let cell = document.getElementById(selected)
@@ -159,7 +165,7 @@ function Game({socket}) {
         cell.classList.toggle('isdigithighlighted', true)
       }
       //setSudokuArr(sudokuArr)
-      this.props.socket.emit("sudoku_change", selected, sudokuArr[Math.floor(selected/9)][selected%9])
+      socket.emit("sudoku-change", roomId, selected, sudokuArr[Math.floor(selected/9)][selected%9])
     }
 
     highlight.forEach(element => {

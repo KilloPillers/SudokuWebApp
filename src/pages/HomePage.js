@@ -11,30 +11,35 @@ export default function HomePage({socket}) {
         isOpen={isOpen} 
         contentLabel="Example Modal" 
         onRequestClose={()=>setIsOpen(false)} 
-        className={"portal"}>
+        className={"portal"}
+        closeTimeoutMS={400}>
             <div>
                 <div class="ReactModalBody-header">
-                    <h4 class="modal-title">Create Room</h4>
+                    <h2 class="modal-title">Create Room</h2>
                 </div>
                 <div className="ReactModalBody">
-                    <form>
+                    <form style={{marginTop:"5%"}} 
+                    onSubmit={(event)=>{
+                            console.log("TEST")
+                            event.preventDefault();
+                            socket.emit('', {roomName: document.getElementById("roomName").value})}}>
                         <label style={{fontSize:20, padding:15}} for="roomName">Room Name:</label>
                         <input style={{background: "#40414f", border: "#ffffff"}} type="text" id="roomName" name="roomName"></input>
                     </form>
-                    <button style={{transform: "translate(10px,10px)"}}onClick={()=>{
-                            socket.emit('room-created', {roomName: document.getElementById("roomName").value})
+                    <button style={{margin: 10}} onClick={()=>{
+                            socket.emit('create-room', {roomName: document.getElementById("roomName").value})
                         }}>Create Room</button>
                 </div>
                 <div class="ReactModalBody-footer">
                     <button style={{background: '#FE4365', borderRadius: "6px", transform: "translate(-10px,-10px"}} type="button" class="btn btn-danger" data-dismiss="modal"
                     onClick={()=> setIsOpen(false)}>Close</button>
                 </div>
-                <div style={{background: "#40414f"}}> </div>
             </div>
         </ReactModal>
-        <div style={{ backgroundColor: '#333', color: '#fff', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <h1>My Website</h1>
-            <nav>
+        <div style={{ backgroundColor: '#333', color: '#fff', height: '50px', position:"relative", display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{paddingLeft: 25}}>Test</div>
+            <h1 style={{position: "absolute", left: "50%", transform: "translate(-50%)"}}>My Website</h1>
+            <nav style={{textAlign: 'right', paddingRight: 25}}>
                 <ul style={{ listStyle: 'none', display: 'flex', gap: '20px' }}>
                     <li>About</li>
                     <li>How To</li>
