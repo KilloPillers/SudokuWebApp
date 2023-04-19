@@ -2,21 +2,22 @@ import '../App.css';
 import React, {useState, useReducer, useEffect} from 'react';
 import { useLocation } from 'react-router-dom';
 import {io} from "socket.io-client";
+import Axios from 'axios';
 
 let selected = 0
 
 let notesMode = false
 
 let initial = [
-  [0, 5, 0, 9, 0, 0, 0, 0, 0],
-  [8, 0, 0, 0, 4, 0, 3, 0, 7],
-  [0, 0, 0, 2, 8, 0, 1, 9, 0],
-  [5, 3, 8, 6, 0, 7, 9, 4, 0],
-  [0, 2, 0, 3, 0, 1, 0, 0, 0],
-  [1, 0, 9, 8, 0, 4, 6, 2, 3],
-  [9, 0, 7, 4, 0, 0, 0, 0, 0],
-  [0, 4, 5, 0, 0, 0, 2, 0, 9],
-  [0, 0, 0, 0, 3, 0, 0, 7, 0]
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
 let solved_sudoku = [
@@ -82,19 +83,40 @@ function SolveSudoku(index){
 */
 
 function Game({socket}) {
-  const [, forceUpdate] = useReducer(x => x + 1, 0);
-  const [sudokuArr, setSudokuArr] = useState(initial);
+  let [, forceUpdate] = useReducer(x => x + 1, 0);
+  let [sudokuArr, setSudokuArr] = useState(initial);
   //const [highlight, setHighlight] = useState([])
-  const location = useLocation();
-  const currentRoute = location.pathname;
-  const roomId = currentRoute.split("/")[2];
-  const roomName = "UnNamed"
+  let location = useLocation();
+  let currentRoute = location.pathname;
+  let roomId = currentRoute.split("/")[2];
+  let roomName = "UnNamed"
 
   useEffect(() => {
     console.log("Connecting to serer")
     console.log(currentRoute)
     socket.emit("join-room", roomId)
 
+    Axios.get('http://localhost:3000/joinRoom/' + roomId)
+    .then(response => {
+      console.log(response.data);
+      // Update your React.js state with the fetched data here
+      let unsolvedPuzzle = response.data.unsolvedPuzzle
+      let solvedPuzzle = response.data.solvedPuzzle
+      for (let i = 0; i < 81; i++) {
+        sudokuArr[Math.floor(i/9)][i%9] = unsolvedPuzzle[i];
+        initial[Math.floor(i/9)][i%9] = unsolvedPuzzle[i];
+        solved_sudoku[Math.floor(i/9)][i%9] = solvedPuzzle[i];
+        let cell = document.getElementById(i)
+        if (solved_sudoku[Math.floor(i/9)][i%9] === sudokuArr[Math.floor(i/9)][i%9] || sudokuArr[Math.floor(i/9)][i%9] === 0)
+          cell.classList.toggle('iswrong', false)
+        else
+          cell.classList.toggle('iswrong', true)
+      }
+      forceUpdate()
+    })
+    .catch(error => console.error(error));
+
+    /*
     socket.on("room-data", (roomData) => {
       roomName = roomData.name
       console.log(roomData.solvedPuzzle)
@@ -112,7 +134,8 @@ function Game({socket}) {
       console.log(sudokuArr)
       forceUpdate()
     });
-    
+    */
+
     socket.on("sudoku-change", (roomId, selected, value) => {
       sudokuArr[Math.floor(selected/9)][selected%9] = value;
       initial[Math.floor(selected/9)][selected%9] = value;

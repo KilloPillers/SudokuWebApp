@@ -20,7 +20,7 @@ export default function App() {
         <Routes>
           <Route index element={<HomePage socket={socket}/>}/>
           <Route path="/home" element={<HomePage socket={socket}/>} />
-          <Route path="/game/*" element={<Game socket={socket}/>}/>
+          <Route path="/room/*" element={<Game socket={socket}/>}/>
           <Route path="*" element={<NoPage socket={socket}/>}/>
         </Routes>
       </BrowserRouter>
