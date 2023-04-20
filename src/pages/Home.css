@@ -74,17 +74,54 @@ font-size: 250%;
 .HomeBody{
     display: grid;
     grid-template-columns: [left-padding] 5% [menu] 25% [filler] auto [right-padding] 5%;
-    grid-template-rows: 1fr;
+    grid-template-rows: [whole] 90vh;
 }
 
 .item1{
+    grid-template-columns: [left-padding] 10% [center] auto [right-padding] 10%;
+    grid-template-rows: [top-padding] 20% [center] auto [bottom-padding] 20%;
     grid-column: menu;
     grid-row: auto;
-    background: red;
+    display: grid;
+}
+
+.item1 div{
+    border-radius: 10px;
+    grid-column: center;
+    grid-row: center;
+    text-align: center;
+    grid-template-columns: auto;
+    grid-template-rows: [header] 15% [body] auto [footer] auto;
+    background-color: #40414f;
+}
+
+.item1-header{
+    padding-top: 20px;
+    font-size: 30px;
     display: flex;
+    justify-content: center;
+    text-align: center;
+    text-decoration: underline;
+    grid-row: header;
+    color:aliceblue
+}
+
+.item1 button{
+    border-radius: 10px;
+    width: 30%;
+    height: 5%;
 }
 
 .item2{
-    grid-column: filler;
-    background-color: aqua;
+    display: grid;
+    grid-template-columns:  [left-padding] auto, [sudoku] 480px [right-padding] auto;
+    grid-template-rows: [top-padding] auto [sudoku] 480px [bottom-padding] auto;
+}
+
+.item2 div {
+    width: 480px;
+    background-color:#40414f;
+    overflow: hidden;
+    grid-column: sudoku;
+    grid-row: sudoku;
 }

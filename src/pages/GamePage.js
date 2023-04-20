@@ -2,6 +2,7 @@ import '../App.css';
 import React, {useState, useReducer, useEffect} from 'react';
 import { useLocation } from 'react-router-dom';
 import {io} from "socket.io-client";
+import { Navigate } from 'react-router-dom';
 import Axios from 'axios';
 
 let selected = 0
@@ -112,11 +113,12 @@ function Game({socket}) {
         else
           cell.classList.toggle('iswrong', true)
       }
+      setSudokuArr(sudokuArr)
       forceUpdate()
     })
     .catch(error => console.error(error));
 
-    /*
+    
     socket.on("room-data", (roomData) => {
       roomName = roomData.name
       console.log(roomData.solvedPuzzle)
@@ -132,9 +134,9 @@ function Game({socket}) {
           cell.classList.toggle('iswrong', true)
       }
       console.log(sudokuArr)
+      setSudokuArr(sudokuArr)
       forceUpdate()
     });
-    */
 
     socket.on("sudoku-change", (roomId, selected, value) => {
       sudokuArr[Math.floor(selected/9)][selected%9] = value;
@@ -147,6 +149,10 @@ function Game({socket}) {
       setSudokuArr(sudokuArr)
       forceUpdate()
     });
+
+    socket.on("NoRoomFound", ()=> {
+      Navigate("/home")
+    })
 
     document.addEventListener('keydown', (e) => {
       if (parseInt(e.key)) {

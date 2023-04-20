@@ -70,9 +70,13 @@ io.on('connection', (socket) => {
     //socket.emit("user_connecting", puzzles[Math.floor(Math.random()*puzzles.length)])
 
     socket.on("join-room", (roomId)=>{
+      if (rooms.hasOwnProperty(roomId)) {
+        io.to(socket.id).emit("NoRoomFound")
+        return
+      }
       socket.join(roomId);
-      console.log(`Client joined room ${roomId}`);
-      socket.to(roomId).emit("room-data", rooms[roomId]);//see if you could do this with an express endpoint
+      console.log(`Client-${socket.id} joined room ${roomId}`);
+      io.to(socket.id).emit("room-data", rooms[roomId]);//see if you could do this with an express endpoint
     })
 
     socket.on("leave-room", (roomId)=>{

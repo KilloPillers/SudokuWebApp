@@ -1,8 +1,23 @@
 import "./Home.css"
+import '../App.css'
 import {io} from "socket.io-client"
 import React, {useState} from 'react'
 import ReactModal from 'react-modal'
 import { useNavigate } from 'react-router-dom'
+
+import sudoku from "../Sudoku_copy.svg"
+
+let sudokuArr = [
+    [4, 5, 1, 9, 7, 3, 8, 6, 2],
+    [8, 9, 2, 1, 4, 6, 3, 5, 7],
+    [7, 6, 3, 2, 8, 5, 1, 9, 4],
+    [5, 3, 8, 6, 2, 7, 9, 4, 1],
+    [6, 2, 4, 3, 9, 1, 7, 8, 5],
+    [1, 7, 9, 8, 5, 4, 6, 2, 3],
+    [9, 8, 7, 4, 1, 2, 5, 3, 6],
+    [3, 4, 5, 7, 6, 8, 2, 1, 9],
+    [2, 1, 6, 5, 3, 9, 4, 7, 8]
+  ]
 
 export default function HomePage({socket}) {
     const [isOpen, setIsOpen] = useState(false);
@@ -24,7 +39,6 @@ export default function HomePage({socket}) {
                 <div className="ReactModalBody">
                     <form style={{marginTop:"5%"}} 
                     onSubmit={(event)=>{
-                            console.log("TEST")
                             event.preventDefault();
                             socket.emit('', {roomName: document.getElementById("roomName").value})}}>
                         <label style={{fontSize:20, padding:15}} for="roomName">Room Name:</label>
@@ -64,13 +78,42 @@ export default function HomePage({socket}) {
                 </ul>
             </nav>
         </div>
-        <div className="HomeBody">
-            <div className="item1" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: "green"}}>
-                <button style={{ marginRight: '100px' }} onClick={()=> setIsOpen(true)}>Create Room</button>
-                <button>Button 2</button>
-            </div>
-            <div className="item2">
-                
+        <div>
+            <div className="HomeBody">
+                <div className="item1">
+                    <div>
+                        <div className="item1-header">Welcome To Sudoku Online</div>
+                        <div style={{color:"aliceblue", padding: 10}}>To begin playing with friends please either join or create a room</div>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                            <button style={{ marginRight: '10%' }} onClick={()=> setIsOpen(true)}>Create Room</button>
+                            <button>Join Room</button>
+                        </div>  
+                    </div>
+                </div>
+                <div className="item2">
+                    <div>
+                        <table className='grid-table'>
+                            <tbody>
+                                {
+                                [0,1,2,3,4,5,6,7,8].map((row, rIndex) => {
+                                    return <tr key={rIndex} className={(row + 1) % 3 === 0 && row !== 8 ? 'bBorder':'grid-cell'}>
+                                    {[0,1,2,3,4,5,6,7,8].map((col, cIndex) => {
+                                        return <td key={rIndex+cIndex} className={(col + 1) % 3 === 0 && col !== 8 ? 'rBorder':'grid-cell'}>
+                                        <button 
+                                        id={9*row+col}
+                                        value={sudokuArr[row][col] === 0 ? '' : sudokuArr[row][col]} 
+                                        className={'cell-complete'}
+                                        >{sudokuArr[row][col]}
+                                        </button>
+                                        </td>
+                                        })}
+                                    </tr>
+                                })
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
         <div style={{ backgroundColor: '#333', color: '#fff', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
