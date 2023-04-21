@@ -73,7 +73,7 @@ font-size: 250%;
 
 .HomeBody{
     display: grid;
-    grid-template-columns: [left-padding] 5% [menu] 25% [filler] auto [right-padding] 5%;
+    grid-template-columns: [left-padding] 15% [menu] 25% [filler] auto [right-padding] 5%;
     grid-template-rows: [whole] 90vh;
 }
 
@@ -114,14 +114,26 @@ font-size: 250%;
 
 .item2{
     display: grid;
-    grid-template-columns:  [left-padding] auto, [sudoku] 480px [right-padding] auto;
-    grid-template-rows: [top-padding] auto [sudoku] 480px [bottom-padding] auto;
+    grid-template-columns:  [left-padding] 1%, [sudoku] auto [right-padding] 1%;
+    grid-template-rows: [top-padding] 1% [sudoku] auto [bottom-padding] 1%;
+    overflow: hidden;
 }
 
-.item2 div {
-    width: 480px;
-    background-color:#40414f;
-    overflow: hidden;
-    grid-column: sudoku;
+.container {
+    margin-top: -3%;
+    position: absolute;
     grid-row: sudoku;
+    grid-column: sudoku;
+    background-color: aliceblue;
+}
+  
+.box {
+    z-index: -9;
+    position: absolute;
+    opacity: 1;
+}
+
+.overlay {
+    z-index: 9;
+    margin: 270px; 
 }

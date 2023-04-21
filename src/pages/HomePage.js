@@ -5,7 +5,7 @@ import React, {useState} from 'react'
 import ReactModal from 'react-modal'
 import { useNavigate } from 'react-router-dom'
 
-import sudoku from "../Sudoku_copy.svg"
+import spash from '../homepage-spash.svg'
 
 let sudokuArr = [
     [4, 5, 1, 9, 7, 3, 8, 6, 2],
@@ -91,7 +91,11 @@ export default function HomePage({socket}) {
                     </div>
                 </div>
                 <div className="item2">
-                    <div>
+                    <div className="container">
+                        <div className="box">
+                            <img src={spash} width={1000}></img>
+                        </div>
+                        <div className="box overlay">
                         <table className='grid-table'>
                             <tbody>
                                 {
@@ -112,11 +116,12 @@ export default function HomePage({socket}) {
                                 }
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div style={{ backgroundColor: '#333', color: '#fff', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="footer" style={{ backgroundColor: '#333', color: '#fff', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <p>&copy; 2023 My Website</p>
         </div>
         </>
