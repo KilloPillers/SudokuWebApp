@@ -1,80 +1,83 @@
 .ReactModal__Overlay {
-background-color: rgba(47, 255, 0, 0);
-opacity: 1;
-width: 100%;
-height: 100%;
-position: inherit;
-transform: translate(+0%,+0%);
-transition: opacity 400ms ease-in-out;
+    background-color: rgba(47, 255, 0, 0);
+    opacity: 1;
+    width: 100%;
+    height: 100%;
+    position: inherit;
+    transform: translate(+0%,+0%);
+    transition: opacity 400ms ease-in-out;
 }
 
 .ReactModal__Body--open {
-overflow: hidden;
-background-color: rgba(52,53,65, 1);
+    overflow: hidden;
+    background-color: rgba(52,53,65, 1);
 }
 
 .portal {
-position: absolute;
-color:aliceblue;
-background-color: rgba(52,53,65);
-z-index: 1000;
-border-radius: 10px;
-width: 25%;
-height: 25%;
-opacity: 1;
-transform: translate(+150%,+125%);
-transition: opacity 400ms ease-in-out;
-}
+    position: absolute;
+    left: 50%; /* set the left position to 50% */
+    top: 50%; /* set the top position to 50% */
+    transform: translate(-50%,-50%); /* center the element using translate */
+    color: aliceblue;
+    background-color: rgba(52,53,65);
+    z-index: 1000;
+    border-radius: 10px;
+    width: auto;
+    height: auto;
+    opacity: 1;
+    transition: opacity 400ms ease-in-out;
+  }
 
 input {
-border-radius: 4px;
-background-color: #40414f;
-font-size: 100%;
-color: aliceblue;
-padding: 10px;
+    border-radius: 4px;
+    background-color: #40414f;
+    font-size: 100%;
+    color: aliceblue;
+    padding: 10px;
+    margin: 1%;
 }
 
 .ReactModal__Overlay--before-close{
-opacity: 0;
-background-color: rgba(52,53,65, 0);
+    opacity: 0;
+    background-color: rgba(52,53,65, 0);
 }
 
 .ReactModalBody{
-text-align: center;
-width: auto;
-height: auto;
-background-color: rgba(52,53,65);
-overflow: hidden;
+    text-align: center;
+    width: auto;
+    height: auto;
+    background-color: rgba(52,53,65);
+    overflow: hidden;
 }
 
 .ReactModalBody-header{
-background-color: #40414f;
-position: relative;
-overflow: hidden;
-border-radius: 4px;
-text-align: center;
-font-size: 150%;
-width: auto;
-height: auto;
-width: 100%;
-height: 100%;
+    background-color: #40414f;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 150%;
+    width: auto;
+    height: auto;
+    width: 100%;
+    height: 100%;
 }
 
 .ReactModalBody-footer{
-text-align: right;
-position: relative;
-overflow: hidden;
-width: auto;
-height: auto;
-background-color: #40414f;
-border-radius: 4px;
-font-size: 250%;
+    text-align: right;
+    position: relative;
+    overflow: hidden;
+    width: auto;
+    height: auto;
+    background-color: #40414f;
+    border-radius: 4px;
+    font-size: 250%;
 }
 
 .HomeBody{
     display: grid;
     grid-template-columns: [left-padding] 15% [menu] 25% [filler] auto [right-padding] 5%;
-    grid-template-rows: [whole] 90vh;
+    grid-template-rows: [whole] 95vh;
 }
 
 .item1{
@@ -128,12 +131,12 @@ font-size: 250%;
 }
   
 .box {
-    z-index: -9;
+    z-index: -1;
     position: absolute;
     opacity: 1;
 }
 
 .overlay {
-    z-index: 9;
+    z-index: 0;
     margin: 270px; 
 }

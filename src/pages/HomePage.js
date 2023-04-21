@@ -20,18 +20,20 @@ let sudokuArr = [
   ]
 
 export default function HomePage({socket}) {
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpenCreate, setIsOpenCreate] = useState(false);
+    const [isOpenJoin, setIsOpenJoin] = useState(false);
     const navigate = useNavigate();
 
     return (
         <>
+        <div style={{display: "flex", justifyContent: "center", alignItems: "center", width: "100%"}}>
         <ReactModal 
-        isOpen={isOpen} 
+        isOpen={isOpenCreate} 
         contentLabel="Example Modal" 
-        onRequestClose={()=>setIsOpen(false)} 
+        onRequestClose={()=>setIsOpenCreate(false)} 
         className={"portal"}
         closeTimeoutMS={400}
-        style={{overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
+        style={{display: "block", overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
             <div>
                 <div class="ReactModalBody-header">
                     <h2 class="modal-title">Create Room</h2>
@@ -41,7 +43,7 @@ export default function HomePage({socket}) {
                     onSubmit={(event)=>{
                             event.preventDefault();
                             socket.emit('', {roomName: document.getElementById("roomName").value})}}>
-                        <label style={{fontSize:20, padding:15}} for="roomName">Room Name:</label>
+                        <label style={{fontSize:20, padding:15}} for="roomName">Room Name</label>
                         <input style={{background: "#40414f", border: "#ffffff"}} type="text" id="roomName" name="roomName"></input>
                     </form>
                     <button style={{margin: 10}} onClick={()=>{
@@ -64,10 +66,53 @@ export default function HomePage({socket}) {
                 </div>
                 <div class="ReactModalBody-footer">
                     <button style={{background: '#FE4365', borderRadius: "6px", transform: "translate(-10px,-10px"}} type="button" class="btn btn-danger" data-dismiss="modal"
-                    onClick={()=> setIsOpen(false)}>Close</button>
+                    onClick={()=> setIsOpenCreate(false)}>Close</button>
                 </div>
             </div>
         </ReactModal>
+        <ReactModal 
+        isOpen={isOpenJoin} 
+        contentLabel="Example Modal" 
+        onRequestClose={()=>setIsOpenJoin(false)} 
+        className={"portal"}
+        closeTimeoutMS={400}
+        style={{overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
+            <div>
+                <div class="ReactModalBody-header">
+                    <h2 class="modal-title">Join Room</h2>
+                </div>
+                <div className="ReactModalBody">
+                    <form style={{marginTop:"5%"}} 
+                    onSubmit={(event)=>{
+                            event.preventDefault();
+                            socket.emit('', {roomName: document.getElementById("roomName").value})}}>
+                        <label style={{fontSize:20, padding:15}} for="roomName">Room Name:</label>
+                        <input style={{background: "#40414f", border: "#ffffff"}} type="text" id="roomName" name="roomName"></input>
+                    </form>
+                    <button style={{margin: 10}} onClick={()=>{
+                            let data = {roomName: document.getElementById("roomName").value}
+                            fetch("http://localhost:3000/createRoom", {
+                                method:'post',
+                                header:{
+                                    "Content-Type":"application/json"
+                                },
+                                body:JSON.stringify(data)
+                            })
+                            .then(res => res.json())
+                            .then(res => {
+                                console.log(res.id)
+                                navigate(`/room/${res.id}`)
+                            })
+                            .catch(err => console.log("error"))
+                        }}>Create Room</button>
+                </div>
+                <div class="ReactModalBody-footer">
+                    <button style={{background: '#FE4365', borderRadius: "6px", transform: "translate(-10px,-10px"}} type="button" class="btn btn-danger" data-dismiss="modal"
+                    onClick={()=> setIsOpenJoin(false)}>Close</button>
+                </div>
+            </div>
+        </ReactModal>
+        </div>
         <div style={{ backgroundColor: '#333', color: '#fff', height: '50px', position:"relative", display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{paddingLeft: 25}}>Test</div>
             <h1 style={{position: "absolute", left: "50%", transform: "translate(-50%)"}}>My Website</h1>
@@ -85,8 +130,8 @@ export default function HomePage({socket}) {
                         <div className="item1-header">Welcome To Sudoku Online</div>
                         <div style={{color:"aliceblue", padding: 10}}>To begin playing with friends please either join or create a room</div>
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                            <button style={{ marginRight: '10%' }} onClick={()=> setIsOpen(true)}>Create Room</button>
-                            <button>Join Room</button>
+                            <button style={{ marginRight: '10%' }} onClick={()=> setIsOpenCreate(true)}>Create Room</button>
+                            <button onClick={()=> setIsOpenJoin(true)}>Join Room</button>
                         </div>  
                     </div>
                 </div>
@@ -121,7 +166,7 @@ export default function HomePage({socket}) {
                 </div>
             </div>
         </div>
-        <div className="footer" style={{ backgroundColor: '#333', color: '#fff', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+        <div style={{ backgroundColor: '#333', color: '#fff', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <p>&copy; 2023 My Website</p>
         </div>
         </>
