@@ -5,7 +5,6 @@
 
 .App-header {
   background-color:282c34;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   color: white;
@@ -134,22 +133,4 @@
   width: 100%;
   padding: 10px;
   flex: 1;
-}
-
-.number-buttons-table {
-  border-spacing: 5px;
-  border-collapse: separate;
-}
-
-.number-buttons-td {
-  padding: 1px;
-}
-
-.number-buttons {
-  background-color: lightgreen;
-  font-size: 25px;
-  flex: 1;
-  width: 50px;
-  height: 50px;
-  border-radius: 100px;
 }

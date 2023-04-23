@@ -51,7 +51,8 @@ app.post('/createRoom', function(req, res) {
   let roomId = Math.random().toString(36).substr(2, 9);
   //console.log(req)
   // Add the new room to the dictionary of rooms
-  rooms[roomId] = {name: req.roomName,
+  rooms[roomId] = {name: req.body.roomName,
+                  time: req.body.startTime,
                   id: roomId, 
                   unsolvedPuzzle: unsolvedSudoku,
                   solvedPuzzle: solvedSudoku};
@@ -80,7 +81,6 @@ io.on('connection', (socket) => {
       }
       socket.leaveAll();
       socket.join(roomId);
-      console.log(socket.rooms)
       console.log(`Client-${socket.id} joined room ${roomId}`);
       io.to(socket.id).emit("room-data", rooms[roomId]);//see if you could do this with an express endpoint
     })
@@ -103,7 +103,7 @@ io.on('connection', (socket) => {
                       solvedPuzzle: solvedSudoku};
       // Notify all clients of the new room's existence
       //io.emit("room created", roomId);
-      console.log(`New room created: ${rooms[roomId].name} ${rooms[roomId].unsolvedPuzzle}`);
+      console.log(`New room created: ${roomId} - ${rooms[roomId].name} | ${rooms[roomId].unsolvedPuzzle}`);
     });
 
     socket.on("disconnect", ()=>{

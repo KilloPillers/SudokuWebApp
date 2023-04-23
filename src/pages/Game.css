@@ -1,0 +1,186 @@
+.Game {
+    background-color:282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    align-items: center;
+    font-size: calc(10px + 2vmin);
+    padding: 0px;;
+}
+
+.Sudoku-frame {
+    display: flex;
+    flex-direction: row;
+}
+
+.Sudoku-frame .Sudoku-container {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    flex: 1;
+    margin: 10px;
+    background-color: black;
+}
+
+.Game-options {
+    flex-grow: 1;
+    flex-basis: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+
+.Game-options button{
+    height: 50px;
+    width: 60px;
+}
+
+.Chat-box {
+    flex-grow: 1;
+    flex-basis: 0;
+    width: 800px;
+    border-radius: 10px;
+    background-color: #b3b3b3;
+    border-color: lightslategray;
+}
+
+.number-buttons-table {
+    margin-top: 10px;
+}
+  
+.number-buttons {
+    background-color: #b3b3b3;
+    border-color: #b3b3b3;
+    font-size: 25px;
+    flex: 1;
+    width: 60px;
+    height: 60px;
+    transition: 500ms
+}
+
+.number-buttons:hover {
+    background: white;
+    color: grey
+}
+
+.cell-complete{
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    text-align: center;
+    color: black;
+    padding: 0px;
+    background-color: white;
+    border: 1px solid black;
+    table-layout: fixed;
+    transition: 250ms;
+    -webkit-animation: rotate-scale-up 0.65s linear both;
+    animation: rotate-scale-up 0.65s linear both;
+    animation-duration: .500ms;
+}
+  
+.cell-complete.isdigithighlighted {
+    background-color: rgb(70, 179, 216);
+    color: blue
+}
+
+.cell-complete.ishighlighted {
+    background-color: lightblue;
+}
+
+.cell-complete.iswrong {
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    text-align: center;
+    padding: 0px;
+    border: 1px solid black;
+    table-layout: fixed;
+    transition: 250ms;
+    -webkit-animation: rotate-scale-up 0.65s linear both;
+    animation: rotate-scale-up 0.65s linear both;
+    animation-duration: .500ms;
+    background-color: rgb(255, 147, 147);
+    color: red;
+}
+
+.cell-complete.isselected {
+    background-color: rgb(70, 179, 216);
+}
+
+.cell:hover div{
+    color: white;
+}
+
+.cell-complete:hover {
+    background-color: grey;
+    color: white;
+}
+
+.cell-selected{
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    text-align: center;
+    color: rgb(61, 61, 61);
+    padding: 0px;
+    background-color: darkgreen;
+    border: 1px solid black;
+    table-layout: fixed;
+    transition: 250ms;
+}
+
+.cell-note-grid {
+    width: 50px;
+    height: 50px;
+    display: grid;
+    grid-gap: 3px;
+    grid-template-columns: 14px 14px 14px;
+    grid-template-rows: 14px 14px 14px;
+}
+
+.cell-note-grid:hover div{
+    color: white
+}
+
+.grid-table {
+    table-layout: fixed;
+    border-collapse:  collapse;
+    border: 3px solid lightslategray;
+    background-color: 282c34;
+}
+
+.grid-table tr {
+    display: flex;
+}
+
+.grid-table tr td {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.grid-cell {
+    flex: 1;
+}
+
+.cell-subgrid {
+    font-size: 10px;
+    color: rgb(75, 87, 99)
+}
+
+.bBorder { 
+    border-bottom: 3px solid black;
+}
+
+.rBorder {
+    border-right: 3px solid black;
+}
+
+.buttons {
+    width: 100%;
+    padding: 10px;
+    flex: 1;
+}

@@ -1,9 +1,11 @@
 import '../App.css';
+import Counter from '../components/Counter';
 import React, {useState, useReducer, useEffect} from 'react';
 import { useLocation } from 'react-router-dom';
 import {io} from "socket.io-client";
 import { Navigate } from 'react-router-dom';
 import Axios from 'axios';
+import moment from 'moment';
 
 let selected = 0
 
@@ -87,15 +89,12 @@ function Game({socket}) {
   let [, forceUpdate] = useReducer(x => x + 1, 0);
   let [sudokuArr, setSudokuArr] = useState(initial);
   let [roomId, setRoomId] = useState(useLocation().pathname.split("/")[2]);
-  //const [highlight, setHighlight] = useState([])
-  let roomName = "UnNamed"
+  let [startTime, setStartTime] = useState()
 
   useEffect(() => {
     socket.emit("join-room", roomId)
     Axios.get('http://localhost:3000/joinRoom/' + roomId)
     .then(response => {
-      console.log(response.data);
-      // Update your React.js state with the fetched data here
       let unsolvedPuzzle = response.data.unsolvedPuzzle
       let solvedPuzzle = response.data.solvedPuzzle
       for (let i = 0; i < 81; i++) {
@@ -108,28 +107,11 @@ function Game({socket}) {
         else
           cell.classList.toggle('iswrong', true)
       }
+      setStartTime(response.data.time)
       setSudokuArr(sudokuArr)
       forceUpdate()
     })
     .catch(error => console.error(error));
-    socket.on("room-data", (roomData) => {
-      roomName = roomData.name
-      console.log(roomData.solvedPuzzle)
-      console.log(roomData.unsolvedPuzzle)
-      for (let i = 0; i < 81; i++) {
-        sudokuArr[Math.floor(i/9)][i%9] = roomData.unsolvedPuzzle[i];
-        initial[Math.floor(i/9)][i%9] = roomData.unsolvedPuzzle[i];
-        solved_sudoku[Math.floor(i/9)][i%9] = roomData.solvedPuzzle[i];
-        let cell = document.getElementById(i)
-        if (solved_sudoku[Math.floor(i/9)][i%9] === sudokuArr[Math.floor(i/9)][i%9] || sudokuArr[Math.floor(i/9)][i%9] === 0)
-          cell.classList.toggle('iswrong', false)
-        else
-          cell.classList.toggle('iswrong', true)
-      }
-      console.log(sudokuArr)
-      setSudokuArr(sudokuArr)
-      forceUpdate()
-    });
 
     socket.on("sudoku-update", (selected, value) => {
       sudokuArr[Math.floor(selected/9)][selected%9] = value;
@@ -268,55 +250,53 @@ function Game({socket}) {
   }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h3>Sudoku v1</h3>
-        <div></div>
-        <table className='grid-table'>
-          <tbody>
-            {
-              [0,1,2,3,4,5,6,7,8].map((row, rIndex) => {
-                return <tr key={rIndex} className={(row + 1) % 3 === 0 && row !== 8 ? 'bBorder':'grid-cell'}>
-                  {[0,1,2,3,4,5,6,7,8].map((col, cIndex) => {
-                    return <td key={rIndex+cIndex} className={(col + 1) % 3 === 0 && col !== 8 ? 'rBorder':'grid-cell'}>
-                      <button 
-                      onClick={()=>onGridButtonClick(row,col)} 
-                      id={9*row+col}
-                      value={sudokuArr[row][col] === 0 ? '' : sudokuArr[row][col]} 
-                      className={'cell-complete'}
-                      >{sudokuArr[row][col] === 0 ? <div className='cell-note-grid'>{[1,2,3,4,5,6,7,8,9].map((i) => {
-                        return <div id={9*row+col+'-'+i} className='cell-subgrid'>{''}</div>})}</div> : sudokuArr[row][col]}
-                      </button>
-                    </td>
-                    })}
-                  </tr>
-              })
-            }
-          </tbody>
-        </table>
-        <div>
-          <table className='number-buttons-table'>
-            {
-              [1,2,3,4,5,6,7,8,9].map((num, val) => {
-                return <td className='number-buttons-td' key={val}>
-                    <button key={val} value={num} className='number-buttons' 
-                    onClick={()=>onNumberButtonClick(num)}
-                    >{num}</button>
-                  </td>
-              })
-            }
-          </table>
+    <div className="Game">
+      <header className="Game-header"></header>
+      <h3>Sudoku v1</h3>
+      {startTime !== undefined && <Counter time={startTime} />}
+      <div className='Sudoku-frame'>
+        <div className='Game-options'>
           <button onClick={() => {
             notesMode = !notesMode
           }}>Enable Notes</button>
           <button onClick={() => {
-              setSudokuArr(solved_sudoku)      
-          }}>Solve Game</button>
-          <button onClick={() => {
-              console.log(selected)      
-          }}>Test Button</button>
+          }}>Invite</button>
         </div>
-      </header>
+        <div className='Sudoku-container'>
+          <table className='grid-table'>
+            <tbody>
+              {
+                [0,1,2,3,4,5,6,7,8].map((row, rIndex) => {
+                  return <tr key={rIndex} className={(row + 1) % 3 === 0 && row !== 8 ? 'bBorder':'grid-cell'}>
+                    {[0,1,2,3,4,5,6,7,8].map((col, cIndex) => {
+                      return <td key={rIndex+cIndex} className={(col + 1) % 3 === 0 && col !== 8 ? 'rBorder':'grid-cell'}>
+                        <button 
+                        onClick={()=>onGridButtonClick(row,col)} 
+                        id={9*row+col}
+                        value={sudokuArr[row][col] === 0 ? '' : sudokuArr[row][col]} 
+                        className={'cell-complete'}
+                        >{sudokuArr[row][col] === 0 ? <div className='cell-note-grid'>{[1,2,3,4,5,6,7,8,9].map((i) => {
+                          return <div id={9*row+col+'-'+i} className='cell-subgrid'>{''}</div>})}</div> : sudokuArr[row][col]}
+                        </button>
+                      </td>
+                      })}
+                    </tr>
+                })
+              }
+            </tbody>
+          </table>
+        </div>
+        <div className="Chat-box"></div>
+      </div>
+      <div className='number-buttons-table'>
+        {
+          [1,2,3,4,5,6,7,8,9].map((num, val) => {
+            return <button key={val} value={num} className='number-buttons' 
+                onClick={()=>onNumberButtonClick(num)}
+            >{num}</button>
+          })
+        }
+      </div>
     </div>
   );
 }

@@ -1,10 +1,12 @@
 import "./Home.css"
 import '../App.css'
+import "./Game.css"
 import {io} from "socket.io-client"
 import React, {useState} from 'react'
 import ReactModal from 'react-modal'
 import { useNavigate } from 'react-router-dom'
 import axios from "axios"
+import moment from "moment"
 
 import spash from '../homepage-spash.svg'
 
@@ -48,20 +50,15 @@ export default function HomePage({socket}) {
                         <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="roomName" name="roomName"></input>
                     </form>
                     <button style={{margin: 10}} onClick={()=>{
-                            let data = {roomName: document.getElementById("roomName").value}
-                            fetch("http://localhost:3000/createRoom", {
-                                method:'post',
-                                header:{
-                                    "Content-Type":"application/json"
-                                },
-                                body:JSON.stringify(data)
+                            let data = {roomName: document.getElementById("roomName").value, startTime: moment().unix()}
+                            axios.post("http://localhost:3000/createRoom", {
+                                roomName: document.getElementById("roomName").value, 
+                                startTime: moment().unix()
                             })
-                            .then(res => res.json())
-                            .then(res => {
-                                console.log(res.id)
-                                navigate(`/room/${res.id}`)
+                            .then((response) => {
+                                navigate(`/room/${response.data.id}`)
                             })
-                            .catch(err => console.log("error"))
+                            .catch((err)  => console.error(err));
                         }}>Create Room</button>
                 </div>
                 <div class="ReactModalBody-footer">
@@ -86,11 +83,13 @@ export default function HomePage({socket}) {
                     onSubmit={(event)=>{
                             event.preventDefault();
                         }}>
-                        <label style={{fontSize:20, padding:15}} for="roomId">Room Name:</label>
+                        <label style={{fontSize:20, padding:15}} for="roomId">Room Code</label>
                         <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="roomId" name="roomId"></input>
                     </form>
                     <button style={{margin: 10}} onClick={()=>{
                             let roomId = document.getElementById("roomId").value
+                            if (roomId === '')
+                                return
                             axios.get("http://localhost:3000/roomExists/" + roomId)
                             .then(response => {
                                 if (response.data)
