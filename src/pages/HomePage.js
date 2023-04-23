@@ -45,7 +45,7 @@ export default function HomePage({socket}) {
                             event.preventDefault();
                         }}>
                         <label style={{fontSize:20, padding:15}} for="roomName">Room Name</label>
-                        <input style={{background: "#40414f", border: "#ffffff"}} type="text" id="roomName" name="roomName"></input>
+                        <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="roomName" name="roomName"></input>
                     </form>
                     <button style={{margin: 10}} onClick={()=>{
                             let data = {roomName: document.getElementById("roomName").value}
@@ -87,7 +87,7 @@ export default function HomePage({socket}) {
                             event.preventDefault();
                         }}>
                         <label style={{fontSize:20, padding:15}} for="roomId">Room Name:</label>
-                        <input style={{background: "#40414f", border: "#ffffff"}} type="text" id="roomId" name="roomId"></input>
+                        <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="roomId" name="roomId"></input>
                     </form>
                     <button style={{margin: 10}} onClick={()=>{
                             let roomId = document.getElementById("roomId").value
@@ -110,7 +110,7 @@ export default function HomePage({socket}) {
         </div>
         <div style={{ backgroundColor: '#333', color: '#fff', height: '50px', position:"relative", display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{paddingLeft: 25}}>Test</div>
-            <h1 style={{position: "absolute", left: "50%", transform: "translate(-50%)"}}>My Website</h1>
+            <h1 style={{position: "absolute", left: "50%", transform: "translate(-50%)"}}>Online Sudoku</h1>
             <nav style={{textAlign: 'right', paddingRight: 25}}>
                 <ul style={{ listStyle: 'none', display: 'flex', gap: '20px' }}>
                     <li>About</li>
