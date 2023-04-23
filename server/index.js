@@ -33,8 +33,14 @@ app.get('/data', (req, res) => {
 })
 
 app.get('/joinRoom/:roomId', (req, res) => {
-  console.log("From /joinRoom ", req.params.roomId)
   res.send(rooms[req.params.roomId])
+})
+
+app.get('/roomExists/:roomId', (req, res) => {
+  if (rooms.hasOwnProperty(req.params.roomId))
+    res.send(true)
+  else
+    res.send(false)
 })
 
 app.post('/createRoom', function(req, res) {
@@ -64,17 +70,17 @@ io.on('connection', (socket) => {
         //console.log("Sudoku: ", sudoku_data,  " ", socketID)
         console.log(roomId, selected, value)
         rooms[roomId].unsolvedPuzzle[selected] = value
-        socket.to(roomId).emit("sudoku-change", roomId, selected, value)
+        socket.to(roomId).emit("sudoku-update", selected, value)
     })
 
-    //socket.emit("user_connecting", puzzles[Math.floor(Math.random()*puzzles.length)])
-
     socket.on("join-room", (roomId)=>{
-      if (rooms.hasOwnProperty(roomId)) {
+      if (!rooms.hasOwnProperty(roomId)) {
         io.to(socket.id).emit("NoRoomFound")
         return
       }
+      socket.leaveAll();
       socket.join(roomId);
+      console.log(socket.rooms)
       console.log(`Client-${socket.id} joined room ${roomId}`);
       io.to(socket.id).emit("room-data", rooms[roomId]);//see if you could do this with an express endpoint
     })
@@ -85,6 +91,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on("create-room", (roomData) => {
+      socket.leaveAll();
       let RandomSudoku = puzzles[Math.floor(Math.random()*puzzles.length)].split(",");
       let unsolvedSudoku = RandomSudoku[0].split("").map(Number)
       let solvedSudoku = RandomSudoku[1].split("").map(Number)

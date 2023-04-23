@@ -116,10 +116,12 @@ input {
 }
 
 .item2{
+    display: inline-block;
     position: relative;
 }
 
 .container { 
+    display: inline-block;
     position: absolute;
     left: 50%; /* set the left position to 50% */
     top: 50%; /* set the top position to 50% */
@@ -131,11 +133,31 @@ input {
 .box {
     z-index: -10;
     opacity: 1;
-    transform: translate(0%,50%);
+    transform: translate(0%,0%);        
 }
 
 .overlay {
     z-index: 1;
-    margin: 270px;
-    transform: translate(0%,-105%); 
+    transform: translate(27%,-725px); 
+    height: 0px;
+}
+
+
+html, body {
+    height: 100%; /* make sure that the html and body elements take up the full height of the viewport */
+    margin: 0; /* remove any default margins */
+    padding: 0; /* remove any default padding */
+    overflow-x: hidden;
+  }
+  
+.page-wrapper {
+    min-height: 100%; /* set the minimum height of the wrapper to 100% */
+    position: relative; /* set the wrapper to be a positioned element */
+}
+
+.footer {
+    position: relative; /* set the footer to be a positioned element */
+    bottom: 0; /* position the bottom of the footer at the bottom of the page */
+    width: 100%; /* make the width of the footer 100% of the page */
+    height: 50px; /* set the height of the footer */
 }

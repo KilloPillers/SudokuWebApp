@@ -4,6 +4,7 @@ import {io} from "socket.io-client"
 import React, {useState} from 'react'
 import ReactModal from 'react-modal'
 import { useNavigate } from 'react-router-dom'
+import axios from "axios"
 
 import spash from '../homepage-spash.svg'
 
@@ -42,12 +43,11 @@ export default function HomePage({socket}) {
                     <form style={{marginTop:"5%"}} 
                     onSubmit={(event)=>{
                             event.preventDefault();
-                            socket.emit('', {roomName: document.getElementById("roomName").value})}}>
+                        }}>
                         <label style={{fontSize:20, padding:15}} for="roomName">Room Name</label>
                         <input style={{background: "#40414f", border: "#ffffff"}} type="text" id="roomName" name="roomName"></input>
                     </form>
                     <button style={{margin: 10}} onClick={()=>{
-                            //socket.emit('create-room', {roomName: document.getElementById("roomName").value})
                             let data = {roomName: document.getElementById("roomName").value}
                             fetch("http://localhost:3000/createRoom", {
                                 method:'post',
@@ -85,26 +85,21 @@ export default function HomePage({socket}) {
                     <form style={{marginTop:"5%"}} 
                     onSubmit={(event)=>{
                             event.preventDefault();
-                            socket.emit('', {roomName: document.getElementById("roomName").value})}}>
-                        <label style={{fontSize:20, padding:15}} for="roomName">Room Name:</label>
-                        <input style={{background: "#40414f", border: "#ffffff"}} type="text" id="roomName" name="roomName"></input>
+                        }}>
+                        <label style={{fontSize:20, padding:15}} for="roomId">Room Name:</label>
+                        <input style={{background: "#40414f", border: "#ffffff"}} type="text" id="roomId" name="roomId"></input>
                     </form>
                     <button style={{margin: 10}} onClick={()=>{
-                            let data = {roomName: document.getElementById("roomName").value}
-                            fetch("http://localhost:3000/createRoom", {
-                                method:'post',
-                                header:{
-                                    "Content-Type":"application/json"
-                                },
-                                body:JSON.stringify(data)
+                            let roomId = document.getElementById("roomId").value
+                            axios.get("http://localhost:3000/roomExists/" + roomId)
+                            .then(response => {
+                                if (response.data)
+                                    navigate(`/room/${roomId}`)
+                                else
+                                    console.log("No Room Found")
                             })
-                            .then(res => res.json())
-                            .then(res => {
-                                console.log(res.id)
-                                navigate(`/room/${res.id}`)
-                            })
-                            .catch(err => console.log("error"))
-                        }}>Create Room</button>
+                            .catch(error => console.error(error));
+                        }}>Join Room</button>
                 </div>
                 <div class="ReactModalBody-footer">
                     <button style={{background: '#FE4365', borderRadius: "6px", transform: "translate(-10px,-10px"}} type="button" class="btn btn-danger" data-dismiss="modal"
@@ -166,7 +161,7 @@ export default function HomePage({socket}) {
                 </div>
             </div>
         </div>
-        <div style={{ backgroundColor: '#333', color: '#fff', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+        <div className="footer" style={{ backgroundColor: '#333', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <p>&copy; 2023 My Website</p>
         </div>
         </>

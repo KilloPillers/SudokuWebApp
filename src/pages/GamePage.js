@@ -86,17 +86,12 @@ function SolveSudoku(index){
 function Game({socket}) {
   let [, forceUpdate] = useReducer(x => x + 1, 0);
   let [sudokuArr, setSudokuArr] = useState(initial);
+  let [roomId, setRoomId] = useState(useLocation().pathname.split("/")[2]);
   //const [highlight, setHighlight] = useState([])
-  let location = useLocation();
-  let currentRoute = location.pathname;
-  let roomId = currentRoute.split("/")[2];
   let roomName = "UnNamed"
 
   useEffect(() => {
-    console.log("Connecting to serer")
-    console.log(currentRoute)
     socket.emit("join-room", roomId)
-
     Axios.get('http://localhost:3000/joinRoom/' + roomId)
     .then(response => {
       console.log(response.data);
@@ -117,8 +112,6 @@ function Game({socket}) {
       forceUpdate()
     })
     .catch(error => console.error(error));
-
-    
     socket.on("room-data", (roomData) => {
       roomName = roomData.name
       console.log(roomData.solvedPuzzle)
@@ -138,7 +131,7 @@ function Game({socket}) {
       forceUpdate()
     });
 
-    socket.on("sudoku-change", (roomId, selected, value) => {
+    socket.on("sudoku-update", (selected, value) => {
       sudokuArr[Math.floor(selected/9)][selected%9] = value;
       initial[Math.floor(selected/9)][selected%9] = value;
       let cell = document.getElementById(selected)
@@ -154,11 +147,32 @@ function Game({socket}) {
       Navigate("/home")
     })
 
-    document.addEventListener('keydown', (e) => {
+    let hasKeydownListener = false;
+
+    // Define your keydown event listener function
+    const keydownListener = (e) => {
       if (parseInt(e.key)) {
         onNumberButtonClick(parseInt(e.key))
       }
-    }, false)
+    };
+
+    // Add the event listener to the document if it hasn't been added yet
+    if (!hasKeydownListener) {
+      document.addEventListener('keydown', keydownListener, false);
+      hasKeydownListener = true;
+    }
+
+    // Remove the event listener when the page is unloaded
+    window.addEventListener('unload', () => {
+      document.removeEventListener('keydown', keydownListener, false);
+      hasKeydownListener = false;
+    });
+
+    return () => {
+      document.removeEventListener('keydown', keydownListener, false);
+      hasKeydownListener = false;
+    };
+    
   }, [])
 
   function onNumberButtonClick(val) {
