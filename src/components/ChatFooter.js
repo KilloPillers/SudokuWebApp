@@ -5,9 +5,7 @@ const ChatFooter = ({socket, roomId}) => {
 
     const handleSendMessage = (e) => {
         e.preventDefault()
-        console.log("TESTING no trim: ", roomId)
         if (message.trim() && localStorage.getItem("userName")) {
-            console.log("TEST: ", roomId)
             socket.emit("message", {
                 text: message, 
                 name: localStorage.getItem("userName"), 

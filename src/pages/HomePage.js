@@ -82,13 +82,21 @@ export default function HomePage({socket}) {
                     onSubmit={(event)=>{
                             event.preventDefault();
                         }}>
-                        <label style={{fontSize:20, padding:15}} for="roomId">Room Code</label>
-                        <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="roomId" name="roomId"></input>
+                        <div>
+                            <label style={{fontSize:20, padding:15}} for="userName">User Name</label>
+                            <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="userName" name="userName"></input>
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                            <label style={{fontSize:20}} for="roomId">Room Code</label>
+                            <input style={{background: "#40414f", border: "#ffffff", textAlign: "center", width: "25%"}} type="text" id="roomId" name="roomId"></input>
+                        </div>
                     </form>
                     <button style={{margin: 10}} onClick={()=>{
                             let roomId = document.getElementById("roomId").value
-                            if (roomId === '')
+                            let userName = document.getElementById("userName").value
+                            if (roomId === '' || userName === '')
                                 return
+                            localStorage.setItem("userName", userName)
                             axios.get("http://localhost:3000/roomExists/" + roomId)
                             .then(response => {
                                 if (response.data)

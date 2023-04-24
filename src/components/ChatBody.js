@@ -1,15 +1,7 @@
 import './Chatbox.css'
 import React from 'react'
-import {useNavigate} from "react-router-dom"
 
-const ChatBody = ({messages, typingStatus, lastMessageRef}) => { 
-  const navigate = useNavigate()
-  
-  const handleLeaveChat = () => {
-    localStorage.removeItem("userName")
-    navigate("/")
-    window.location.reload()
-  }
+const ChatBody = ({messages, lastMessageRef}) => { 
   
   return (
     <>
@@ -23,17 +15,15 @@ const ChatBody = ({messages, typingStatus, lastMessageRef}) => {
             </div>
           ):(
             <div className="message__chats" key={message.id}>
-              <p>{message.name}</p>
-              <div className='message__recipient'>
-                <p>{message.text}</p>
+              <div className='message__recipeient'>
+                <p style={{marginLeft:"2px", fontSize: "12px"}}>{message.name}</p>
+                <div className='message__recipient'>
+                  <p>{message.text}</p>
+                </div>
               </div>
             </div>
           )
           ))}
-
-        <div className='message__status'>
-          <p>{typingStatus}</p>
-        </div>
         <div ref={lastMessageRef} />   
       </div>
     </>

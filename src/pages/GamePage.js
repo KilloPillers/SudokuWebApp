@@ -2,8 +2,8 @@ import '../App.css';
 import Counter from '../components/Counter';
 import Chatbox from '../components/ChatBox';
 import React, {useState, useReducer, useEffect} from 'react';
+import ReactModal from 'react-modal';
 import { useLocation } from 'react-router-dom';
-import {io} from "socket.io-client";
 import { Navigate } from 'react-router-dom';
 import Axios from 'axios';
 import moment from 'moment';
@@ -91,6 +91,7 @@ function Game({socket}) {
   let [sudokuArr, setSudokuArr] = useState(initial);
   let [roomId, setRoomId] = useState(useLocation().pathname.split("/")[2]);
   let [startTime, setStartTime] = useState()
+  let [userName, setUserName] = useState(localStorage.getItem("userName"))
 
   useEffect(() => {
     socket.emit("join-room", roomId)
@@ -250,18 +251,39 @@ function Game({socket}) {
     }
   }
 
-  /*
-  if (localStorage.getItem("userName") === null) {
-    return (
-      <div>
-        ** get user name somehow **
-        ** use forceUpdate to redraw dom **
-      </div>
-    )
-  }
-  */
-
   return (
+    <>
+     <ReactModal 
+      isOpen={userName === null} 
+      contentLabel="Example Modal"
+      className={"portal"}
+      closeTimeoutMS={400}
+      style={{display: "block", overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
+          <div>
+              <div class="ReactModalBody-header">
+                  <h2 class="modal-title">Create Room</h2>
+              </div>
+              <div className="ReactModalBody">
+                  <form style={{marginTop:"5%"}} 
+                    onSubmit={(event)=>{
+                        event.preventDefault();
+                        localStorage.setItem("userName", document.getElementById("userName").value)
+                        setUserName(document.getElementById("userName").value)
+                    }}>
+                    <label style={{fontSize:20, padding:15}} for="uerName">User Name</label>
+                    <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="userName" name="roomName"></input>
+                  </form>
+                  <button style={{margin: 10}} 
+                  onClick={()=>{
+                    localStorage.setItem("userName", document.getElementById("userName").value)
+                    setUserName(document.getElementById("userName").value)
+                  }}>Enter</button>
+              </div>
+              <div class="ReactModalBody-footer">
+
+              </div>
+          </div>
+      </ReactModal>
     <div className="Game">
       <header className="Game-header"></header>
       <h3>Sudoku v1</h3>
@@ -312,6 +334,7 @@ function Game({socket}) {
         }
       </div>
     </div>
+    </>
   );
 }
 

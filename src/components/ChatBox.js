@@ -4,18 +4,14 @@ import ChatFooter from './ChatFooter'
 
 const ChatBox = ({socket, roomId}) => { 
   const [messages, setMessages] = useState([])
-  const [typingStatus, setTypingStatus] = useState("")
   const lastMessageRef = useRef(null);
 
   useEffect(()=> {
-    socket.on("messageRessponse", (data) => {
+    socket.on("messageResponse", (data) => {
+      console.log("received message")
       setMessages([...messages, data])
     })
   }, [socket, messages])
-
-  useEffect(()=> {
-    socket.on("typingResponse", data => setTypingStatus(data))
-  }, [socket])
 
   useEffect(() => {
     // scroll to bottom every time messages change
@@ -28,7 +24,7 @@ const ChatBox = ({socket, roomId}) => {
         <header className='chat__mainHeader'>
             <p style={{textAlign:"center", background: "lightskyblue", fontSize: "20px"}}>Room Chat</p>
         </header>
-        <ChatBody messages={messages} typingStatus={typingStatus} lastMessageRef={lastMessageRef}/>
+        <ChatBody messages={messages} lastMessageRef={lastMessageRef}/>
         <ChatFooter socket={socket} roomId={roomId}/>
       </div>
     </div>

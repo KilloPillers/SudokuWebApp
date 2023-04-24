@@ -95,11 +95,17 @@
 }
 
 .message__recipient {
-  background-color: lightgreen;
-  width: 300px;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  align-self: center;
+  background-color: lightgrey;
+  max-width: 300px;
   padding: 10px;
   border-radius: 10px;
+  margin-right: auto;
   font-size: 15px;
+  align-self: left;
 }
 
 .message__sender {
