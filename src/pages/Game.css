@@ -15,12 +15,15 @@
 }
 
 .Sudoku-frame .Sudoku-container {
-    display: flex;
-    align-items: center;
-    align-self: stretch;
+    width: 100%;
+    text-align: center;
     flex: 1;
-    margin: 10px;
-    background-color: black;
+    margin: 15px;
+}
+
+.Sudoku-frame .Sudoku-container .grid-table{
+    margin: 0 auto
+
 }
 
 .Game-options {
@@ -42,7 +45,6 @@
     flex-basis: 0;
     width: 900px;
     border-radius: 10px;
-    background-color: #b3b3b3;
     border-color: lightslategray;
 }
 

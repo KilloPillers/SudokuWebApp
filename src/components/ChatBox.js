@@ -25,6 +25,9 @@ const ChatBox = ({socket, roomId}) => {
   return (
     <div className="chat">
       <div className='chat__main'>
+        <header className='chat__mainHeader'>
+            <p style={{textAlign:"center", background: "lightskyblue"}}>Room Chat</p>
+        </header>
         <ChatBody messages={messages} typingStatus={typingStatus} lastMessageRef={lastMessageRef}/>
         <ChatFooter socket={socket} roomId={roomId}/>
       </div>
