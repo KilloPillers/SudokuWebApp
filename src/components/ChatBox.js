@@ -8,7 +8,7 @@ const ChatBox = ({socket, roomId}) => {
   const lastMessageRef = useRef(null);
 
   useEffect(()=> {
-    socket.on("messageResponse", (data) => {
+    socket.on("messageRessponse", (data) => {
       setMessages([...messages, data])
     })
   }, [socket, messages])
@@ -26,7 +26,7 @@ const ChatBox = ({socket, roomId}) => {
     <div className="chat">
       <div className='chat__main'>
         <header className='chat__mainHeader'>
-            <p style={{textAlign:"center", background: "lightskyblue"}}>Room Chat</p>
+            <p style={{textAlign:"center", background: "lightskyblue", fontSize: "20px"}}>Room Chat</p>
         </header>
         <ChatBody messages={messages} typingStatus={typingStatus} lastMessageRef={lastMessageRef}/>
         <ChatFooter socket={socket} roomId={roomId}/>

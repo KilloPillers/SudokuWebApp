@@ -19,7 +19,7 @@ const ChatFooter = ({socket, roomId}) => {
     return (
         <div className='chat__footer'>
             <form className='form' onSubmit={handleSendMessage}>
-            <input 
+                <input 
                 type="text" 
                 placeholder='Write message' 
                 className='message' 
