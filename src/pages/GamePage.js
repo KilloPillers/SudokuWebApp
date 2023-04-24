@@ -1,5 +1,6 @@
 import '../App.css';
 import Counter from '../components/Counter';
+import Chatbox from '../components/ChatBox';
 import React, {useState, useReducer, useEffect} from 'react';
 import { useLocation } from 'react-router-dom';
 import {io} from "socket.io-client";
@@ -249,6 +250,17 @@ function Game({socket}) {
     }
   }
 
+  /*
+  if (localStorage.getItem("userName") === null) {
+    return (
+      <div>
+        ** get user name somehow **
+        ** use forceUpdate to redraw dom **
+      </div>
+    )
+  }
+  */
+
   return (
     <div className="Game">
       <header className="Game-header"></header>
@@ -286,7 +298,9 @@ function Game({socket}) {
             </tbody>
           </table>
         </div>
-        <div className="Chat-box"></div>
+        <div className='Chat-box'>
+          <Chatbox socket={socket} roomId={roomId}></Chatbox>
+        </div>
       </div>
       <div className='number-buttons-table'>
         {

@@ -51,8 +51,7 @@ app.post('/createRoom', function(req, res) {
   let roomId = Math.random().toString(36).substr(2, 9);
   //console.log(req)
   // Add the new room to the dictionary of rooms
-  rooms[roomId] = {name: req.body.roomName,
-                  time: req.body.startTime,
+  rooms[roomId] = {time: req.body.startTime,
                   id: roomId, 
                   unsolvedPuzzle: unsolvedSudoku,
                   solvedPuzzle: solvedSudoku};
@@ -72,6 +71,11 @@ io.on('connection', (socket) => {
         console.log(roomId, selected, value)
         rooms[roomId].unsolvedPuzzle[selected] = value
         socket.to(roomId).emit("sudoku-update", selected, value)
+    })
+
+    socket.on("message", data => {
+      console.log(data)
+      io.to(data.roomId).emit("messageResponse", data)
     })
 
     socket.on("join-room", (roomId)=>{

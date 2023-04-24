@@ -46,13 +46,12 @@ export default function HomePage({socket}) {
                     onSubmit={(event)=>{
                             event.preventDefault();
                         }}>
-                        <label style={{fontSize:20, padding:15}} for="roomName">Room Name</label>
-                        <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="roomName" name="roomName"></input>
+                        <label style={{fontSize:20, padding:15}} for="uerName">User Name</label>
+                        <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="userName" name="roomName"></input>
                     </form>
                     <button style={{margin: 10}} onClick={()=>{
-                            let data = {roomName: document.getElementById("roomName").value, startTime: moment().unix()}
+                            localStorage.setItem("userName", document.getElementById("userName").value)
                             axios.post("http://localhost:3000/createRoom", {
-                                roomName: document.getElementById("roomName").value, 
                                 startTime: moment().unix()
                             })
                             .then((response) => {
