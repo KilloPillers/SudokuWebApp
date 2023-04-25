@@ -48,7 +48,7 @@ app.post('/createRoom', function(req, res) {
   let unsolvedSudoku = RandomSudoku[0].split("").map(Number)
   let solvedSudoku = RandomSudoku[1].split("").map(Number)
   // Generate a new room ID
-  let roomId = Math.random().toString(36).substr(2, 9);
+  let roomId = Math.random().toString(36).toUpperCase().replace(/[0-9O]/g, '').substring(1,7)
   //console.log(req)
   // Add the new room to the dictionary of rooms
   rooms[roomId] = {time: req.body.startTime,
@@ -66,9 +66,16 @@ app.post('/createRoom', function(req, res) {
 io.on('connection', (socket) => {
     console.log('A user connected: ', socket.id)
 
-    socket.on("sudoku-change", (roomId, selected, value) => {
+    socket.on("game-over", (roomId) => {
+
+
+    }) 
+
+    socket.on("sudoku-change", (user, roomId, selected, value) => {
         //console.log("Sudoku: ", sudoku_data,  " ", socketID)
-        console.log(roomId, selected, value)
+        console.log(user, roomId, selected, value)
+
+
         rooms[roomId].unsolvedPuzzle[selected] = value
         socket.to(roomId).emit("sudoku-update", selected, value)
     })
@@ -78,14 +85,15 @@ io.on('connection', (socket) => {
       io.to(data.roomId).emit("messageResponse", data)
     })
 
-    socket.on("join-room", (roomId)=>{
+    socket.on("join-room", (userName, roomId)=>{
       if (!rooms.hasOwnProperty(roomId)) {
+        console.log(`Socket: ${socket.id} attempted to join room that does not exist`)
         io.to(socket.id).emit("NoRoomFound")
         return
       }
       socket.leaveAll();
       socket.join(roomId);
-      console.log(`Client-${socket.id} joined room ${roomId}`);
+      console.log(`Socket: ${socket.id} with username: "${userName}" joined room: ${roomId}`);
       io.to(socket.id).emit("room-data", rooms[roomId]);//see if you could do this with an express endpoint
     })
 

@@ -87,19 +87,26 @@ function SolveSudoku(index){
 */
 
 function Game({socket}) {
-  let [, forceUpdate] = useReducer(x => x + 1, 0);
-  let [sudokuArr, setSudokuArr] = useState(initial);
+  let [, forceUpdate] = useReducer(x => x + 1, 0)
+  let [sudokuArr, setSudokuArr] = useState(initial)
+  let [unsolvedCount, setUnsolvedCount] = useState(0)
+  let [isGameOver, setGameOver] = useState(false)
   let [roomId, setRoomId] = useState(useLocation().pathname.split("/")[2]);
   let [startTime, setStartTime] = useState()
   let [userName, setUserName] = useState(localStorage.getItem("userName"))
 
   useEffect(() => {
-    socket.emit("join-room", roomId)
+    console.log(userName)
+    if (userName !== null)
+      socket.emit("join-room", userName, roomId)
     Axios.get('http://localhost:3000/joinRoom/' + roomId)
     .then(response => {
       let unsolvedPuzzle = response.data.unsolvedPuzzle
       let solvedPuzzle = response.data.solvedPuzzle
+      let count = 0
       for (let i = 0; i < 81; i++) {
+        if (unsolvedPuzzle[i] === 0)
+          count+=1
         sudokuArr[Math.floor(i/9)][i%9] = unsolvedPuzzle[i];
         initial[Math.floor(i/9)][i%9] = unsolvedPuzzle[i];
         solved_sudoku[Math.floor(i/9)][i%9] = solvedPuzzle[i];
@@ -109,6 +116,9 @@ function Game({socket}) {
         else
           cell.classList.toggle('iswrong', true)
       }
+      unsolvedCount += count
+      setUnsolvedCount(unsolvedCount)
+      console.log(`There are ${unsolvedCount} unsolved tiles left`)
       setStartTime(response.data.time)
       setSudokuArr(sudokuArr)
       forceUpdate()
@@ -119,8 +129,11 @@ function Game({socket}) {
       sudokuArr[Math.floor(selected/9)][selected%9] = value;
       initial[Math.floor(selected/9)][selected%9] = value;
       let cell = document.getElementById(selected)
-      if (solved_sudoku[Math.floor(selected/9)][selected%9] === value || value === 0)
+      if (solved_sudoku[Math.floor(selected/9)][selected%9] === value || value === 0) {
+        if (solved_sudoku[Math.floor(selected/9)][selected%9] === value)
+          setUnsolvedCount(unsolvedCount-1)
         cell.classList.toggle('iswrong', false)
+      }
       else
         cell.classList.toggle('iswrong', true)
       setSudokuArr(sudokuArr)
@@ -186,13 +199,20 @@ function Game({socket}) {
           if (item !== null)
             item.textContent = ''
         })
+        unsolvedCount -= 1 
+        setUnsolvedCount(unsolvedCount)
+        console.log(`There are ${unsolvedCount} unsolved tiles left`)
+        if (unsolvedCount === 0) {
+          setGameOver(true)
+        }
+        console.log(unsolvedCount)
         let cell = document.getElementById(selected)
         cell.classList.toggle('iswrong', false)
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', true)
       }
       //setSudokuArr(sudokuArr)
-      socket.emit("sudoku-change", roomId, selected, sudokuArr[Math.floor(selected/9)][selected%9])
+      socket.emit("sudoku-change", userName, roomId, selected, sudokuArr[Math.floor(selected/9)][selected%9])
     }
 
     highlight.forEach(element => {
@@ -253,7 +273,25 @@ function Game({socket}) {
 
   return (
     <>
-     <ReactModal 
+    <ReactModal 
+      isOpen={isGameOver} 
+      contentLabel="Example Modal" 
+      className={"portal"}
+      closeTimeoutMS={400}
+      style={{display: "block", overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
+      <div>
+          <div class="ReactModalBody-header">
+              <h2 class="modal-title">Game Finished</h2>
+          </div>
+          <div className="ReactModalBody">
+              
+          </div>
+          <div class="ReactModalBody-footer">
+          
+          </div>
+      </div>
+    </ReactModal>
+    <ReactModal 
       isOpen={userName === null} 
       contentLabel="Example Modal"
       className={"portal"}
@@ -261,22 +299,26 @@ function Game({socket}) {
       style={{display: "block", overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
           <div>
               <div class="ReactModalBody-header">
-                  <h2 class="modal-title">Create Room</h2>
+                  <h2 class="modal-title">Joining Room</h2>
               </div>
               <div className="ReactModalBody">
                   <form style={{marginTop:"5%"}} 
                     onSubmit={(event)=>{
-                        event.preventDefault();
-                        localStorage.setItem("userName", document.getElementById("userName").value)
-                        setUserName(document.getElementById("userName").value)
+                      event.preventDefault();
+                      let username = document.getElementById("userName").value
+                      localStorage.setItem("userName", username)
+                      setUserName(username)
+                      socket.emit("join-room", username, roomId)
                     }}>
                     <label style={{fontSize:20, padding:15}} for="uerName">User Name</label>
                     <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="userName" name="roomName"></input>
                   </form>
                   <button style={{margin: 10}} 
                   onClick={()=>{
-                    localStorage.setItem("userName", document.getElementById("userName").value)
-                    setUserName(document.getElementById("userName").value)
+                    let username = document.getElementById("userName").value
+                    localStorage.setItem("userName", username)
+                    setUserName(username)
+                    socket.emit("join-room", username, roomId)
                   }}>Enter</button>
               </div>
               <div class="ReactModalBody-footer">
