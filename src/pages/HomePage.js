@@ -1,7 +1,6 @@
 import "./Home.css"
 import '../App.css'
 import "./Game.css"
-import {io} from "socket.io-client"
 import React, {useState} from 'react'
 import ReactModal from 'react-modal'
 import { useNavigate } from 'react-router-dom'

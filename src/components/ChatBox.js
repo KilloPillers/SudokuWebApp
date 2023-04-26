@@ -7,9 +7,15 @@ const ChatBox = ({socket, roomId}) => {
   const lastMessageRef = useRef(null);
 
   useEffect(()=> {
-    socket.on("messageResponse", (data) => {
-      setMessages([...messages, data])
-    })
+    if (socket.listeners("messageResponse").length === 0) 
+      socket.on("messageResponse", (data) => {
+        console.log("message")
+        setMessages([...messages, data])
+      })
+    
+      return () => {
+        socket.off("messageResponse")
+      }
   }, [socket, messages])
 
   useEffect(() => {

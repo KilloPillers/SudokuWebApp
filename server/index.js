@@ -80,7 +80,7 @@ io.on('connection', (socket) => {
     }) 
 
     socket.on("sudoku-change", (user, roomId, selected, value) => {
-        console.log(`${user} in ${roomId} put ${value} at position ${selected}`)
+        console.log(`${socket.id} in ${roomId} put ${value} at position ${selected}`)
         if (value !== 0)
           if (rooms[roomId].solvedPuzzle[selected] === value)
             rooms[roomId].users[user].correctCount++
@@ -88,7 +88,7 @@ io.on('connection', (socket) => {
             rooms[roomId].users[user].incorrectCount++
 
         rooms[roomId].unsolvedPuzzle[selected] = value
-        socket.to(roomId).emit("sudoku-update", selected, value)
+        socket.broadcast.to(roomId).emit("sudoku-update", selected, value)
     })
 
     socket.on("message", data => {
@@ -97,12 +97,12 @@ io.on('connection', (socket) => {
     })
 
     socket.on("join-room", (userName, roomId)=>{
+      socket.leaveAll();
       if (!rooms.hasOwnProperty(roomId)) {
         console.log(`Socket: ${socket.id} attempted to join room that does not exist`)
         io.to(socket.id).emit("NoRoomFound")
         return
       }
-      socket.leaveAll();
       socket.join(roomId);
       if (!rooms[roomId].users.hasOwnProperty(userName))
         rooms[roomId].users[userName] = {correctCount: 0, incorrectCount: 0}

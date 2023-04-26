@@ -88,8 +88,8 @@ function SolveSudoku(index){
 */
 
 function Game({socket}) {
-  let [sudokuArr, setSudokuArr] = useState(initial)
-  const [unsolvedCount, setUnsolvedCount] = useEffect(0) //refactor code to use a useRef Hook
+  let [sudokuArr, setSudokuArr] = useState(initial) //refactor code to make this a const
+  let unsolvedCount = useRef(0)
   const [isGameOver, setGameOver] = useState(false)
   const [roomId, ] = useState(useLocation().pathname.split("/")[2]);
   const [startTime, setStartTime] = useState()
@@ -116,8 +116,8 @@ function Game({socket}) {
           let cell = document.getElementById(i)
           cell.classList.toggle('iswrong', !(solvedPuzzle[i] === arr[i] || arr[i] === 0))
         }
-        console.log(`There are ${count} unsolved tiles left`)
-        setUnsolvedCount(count)
+        unsolvedCount = count
+        console.log(`There are ${unsolvedCount} unsolved tiles left`)
         setStartTime(response.data.time)
         setSudokuArr(newArr)
       })
@@ -127,29 +127,33 @@ function Game({socket}) {
   }, [])
 
   useEffect(() => {
-    if (userName !== null)
+    if (userName !== null) {}
       socket.emit("join-room", userName, roomId)
 
-    socket.on("sudoku-update", (selected, value) => {      
-      const updatedSudokuArr = sudokuArr.map((row, i) =>
-        i === Math.floor(selected/9) ? [...row.slice(0, selected%9), value, ...row.slice((selected%9)+1)] : row //where 1 and 2 are row and column respectively
-      );
-      setSudokuArr(updatedSudokuArr);
+    if (socket.listeners("sudoku-update").length === 0)
+      socket.on("sudoku-update", (selected, value) => {  
+        const updatedSudokuArr = sudokuArr.map((row, i) =>
+          i === Math.floor(selected/9) ? [...row.slice(0, selected%9), value, ...row.slice((selected%9)+1)] : row //where 1 and 2 are row and column respectively
+        );
+        setSudokuArr(updatedSudokuArr);
+  
+        initial[Math.floor(selected/9)][selected%9] = value;
+        let cell = document.getElementById(selected)
+        if (solved_sudoku[Math.floor(selected/9)][selected%9] === value || value === 0) {
+          if (solved_sudoku[Math.floor(selected/9)][selected%9] === value)
+          console.log(`There are ${--unsolvedCount} unsolved tiles left`)
+          cell.classList.toggle('iswrong', false)
+        }
+        else
+          cell.classList.toggle('iswrong', true)
+      });
+  
 
-      initial[Math.floor(selected/9)][selected%9] = value;
-      let cell = document.getElementById(selected)
-      if (solved_sudoku[Math.floor(selected/9)][selected%9] === value || value === 0) {
-        if (solved_sudoku[Math.floor(selected/9)][selected%9] === value)
-          setUnsolvedCount(prevUncount => prevUncount--)
-        cell.classList.toggle('iswrong', false)
-      }
-      else
-        cell.classList.toggle('iswrong', true)
-    });
-
-    socket.on("NoRoomFound", ()=> {
-      navigate("/home")
-    })
+    if (socket.listeners("NoRoomFound").length === 0) 
+      socket.on("NoRoomFound", ()=> {
+        navigate("/home")
+      })
+    
 
     let hasKeydownListener = false;
 
@@ -168,6 +172,7 @@ function Game({socket}) {
 
     // Remove the event listener when the page is unloaded
     window.addEventListener('unload', () => {
+      socket.emit("leave-room", userName, roomId)
       document.removeEventListener('keydown', keydownListener, false);
       hasKeydownListener = false;
     });
@@ -177,11 +182,12 @@ function Game({socket}) {
     })
 
     return () => {
+      handleLeaveRoom()
       document.removeEventListener('keydown', keydownListener, false);
       hasKeydownListener = false;
     };
     
-  }, [])
+  }, [socket])
 
   function onNumberButtonClick(val) {
     if (solved_sudoku[Math.floor(selected/9)][selected%9] === sudokuArr[Math.floor(selected/9)][selected%9])
@@ -205,8 +211,6 @@ function Game({socket}) {
           if (item !== null)
             item.textContent = ''
         })
-        setUnsolvedCount(prevUncount => prevUncount--)
-        console.log(`There are ${unsolvedCount} unsolved tiles left`)
         if (unsolvedCount === 0) {
           setGameOver(true)
         }
@@ -276,6 +280,8 @@ function Game({socket}) {
 
   const handleLeaveRoom = () => {
     socket.emit("leave-room", userName, roomId)
+    socket.off("sudoku-update")
+    socket.off("NoRoomFound")
     navigate('/home')
   }
 
