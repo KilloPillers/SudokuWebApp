@@ -2,14 +2,16 @@ import '../App.css';
 import Counter from '../components/Counter';
 import Chatbox from '../components/ChatBox';
 import GameOver from '../components/GameOver';
-import React, {useState, useReducer, useEffect} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import ReactModal from 'react-modal';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Axios from 'axios';
+import axios from 'axios';
 
 let selected = 0
 
 let notesMode = false
+
+//TODO: Refactor all code to use a 1D array instead of 2D array.
 
 let initial = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -86,9 +88,8 @@ function SolveSudoku(index){
 */
 
 function Game({socket}) {
-  let [, forceUpdate] = useReducer(x => x + 1, 0)
   let [sudokuArr, setSudokuArr] = useState(initial)
-  const [unsolvedCount, setUnsolvedCount] = useState(0) //refactor code to use a useRef Hook
+  const [unsolvedCount, setUnsolvedCount] = useEffect(0) //refactor code to use a useRef Hook
   const [isGameOver, setGameOver] = useState(false)
   const [roomId, ] = useState(useLocation().pathname.split("/")[2]);
   const [startTime, setStartTime] = useState()
@@ -97,57 +98,53 @@ function Game({socket}) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    async function getSudoku() {
+      await axios.get('http://localhost:3000/joinRoom/' + roomId)
+      .then(response => {
+        const arr = response.data.unsolvedPuzzle
+        const copy = response.data.unsolvedPuzzle.slice() //this copy exist only to use splice later (a mutable function)
+        const newArr = [];
+        while (copy.length)
+          newArr.push(copy.splice(0,9));
+        const solvedPuzzle = response.data.solvedPuzzle
+        let count = 0
+        for (let i = 0; i < 81; i++) {
+          if (arr[i] === 0) 
+            count++
+          initial[Math.floor(i/9)][i%9] = arr[i];
+          solved_sudoku[Math.floor(i/9)][i%9] = solvedPuzzle[i];
+          let cell = document.getElementById(i)
+          cell.classList.toggle('iswrong', !(solvedPuzzle[i] === arr[i] || arr[i] === 0))
+        }
+        console.log(`There are ${count} unsolved tiles left`)
+        setUnsolvedCount(count)
+        setStartTime(response.data.time)
+        setSudokuArr(newArr)
+      })
+      .catch(error => console.error(error));
+    }
+    getSudoku()
+  }, [])
+
+  useEffect(() => {
     if (userName !== null)
       socket.emit("join-room", userName, roomId)
-    Axios.get('http://localhost:3000/joinRoom/' + roomId)
-    .then(response => {
-      let unsolvedPuzzle = response.data.unsolvedPuzzle
-      let solvedPuzzle = response.data.solvedPuzzle
-      let count = 0
-      for (let i = 0; i < 81; i++) {
-        if (unsolvedPuzzle[i] === 0)
-          count+=1
-        sudokuArr[Math.floor(i/9)][i%9] = unsolvedPuzzle[i];
-        initial[Math.floor(i/9)][i%9] = unsolvedPuzzle[i];
-        solved_sudoku[Math.floor(i/9)][i%9] = solvedPuzzle[i];
-        let cell = document.getElementById(i)
-        if (solved_sudoku[Math.floor(i/9)][i%9] === sudokuArr[Math.floor(i/9)][i%9] || sudokuArr[Math.floor(i/9)][i%9] === 0)
-          cell.classList.toggle('iswrong', false)
-        else
-          cell.classList.toggle('iswrong', true)
-      }
-      setUnsolvedCount(count)
-      console.log(`There are ${unsolvedCount} unsolved tiles left`)
-      setStartTime(response.data.time)
-      setSudokuArr(sudokuArr)
-      forceUpdate()
-    })
-    .catch(error => console.error(error));
 
-    socket.on("sudoku-update", (selected, value) => {
-      /*
-        Refactor Code to use this instead:
+    socket.on("sudoku-update", (selected, value) => {      
+      const updatedSudokuArr = sudokuArr.map((row, i) =>
+        i === Math.floor(selected/9) ? [...row.slice(0, selected%9), value, ...row.slice((selected%9)+1)] : row //where 1 and 2 are row and column respectively
+      );
+      setSudokuArr(updatedSudokuArr);
 
-        const updatedSudokuArr = sudokuArr.map((row, i) =>
-          i === 1 ? [...row.slice(0, 2), newValue, ...row.slice(3)] : row //where 1 and 2 are row and column respectively
-        );
-        setSudokuArr(updatedSudokuArr);
-
-        Compliments of ChatGPT.
-      */
-
-      sudokuArr[Math.floor(selected/9)][selected%9] = value;
       initial[Math.floor(selected/9)][selected%9] = value;
       let cell = document.getElementById(selected)
       if (solved_sudoku[Math.floor(selected/9)][selected%9] === value || value === 0) {
         if (solved_sudoku[Math.floor(selected/9)][selected%9] === value)
-          setUnsolvedCount(prevUncount => prevUncount - 1)
+          setUnsolvedCount(prevUncount => prevUncount--)
         cell.classList.toggle('iswrong', false)
       }
       else
         cell.classList.toggle('iswrong', true)
-      setSudokuArr(sudokuArr)
-      forceUpdate()
     });
 
     socket.on("NoRoomFound", ()=> {
@@ -197,12 +194,7 @@ function Game({socket}) {
       if (solved_sudoku[Math.floor(selected/9)][selected%9] !== val) {
         initial[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? 0 : val
         let cell = document.getElementById(selected)
-        if (initial[Math.floor(selected/9)][selected%9] === val) {
-          cell.classList.toggle('iswrong', true)
-        }
-        else {
-          cell.classList.toggle('iswrong', false)
-        }
+        cell.classList.toggle('iswrong', initial[Math.floor(selected/9)][selected%9] === val)
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', false)
       }
@@ -213,8 +205,7 @@ function Game({socket}) {
           if (item !== null)
             item.textContent = ''
         })
-        unsolvedCount -= 1 
-        setUnsolvedCount(unsolvedCount)
+        setUnsolvedCount(prevUncount => prevUncount--)
         console.log(`There are ${unsolvedCount} unsolved tiles left`)
         if (unsolvedCount === 0) {
           setGameOver(true)
@@ -224,7 +215,6 @@ function Game({socket}) {
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', true)
       }
-      //setSudokuArr(sudokuArr)
       socket.emit("sudoku-change", userName, roomId, selected, sudokuArr[Math.floor(selected/9)][selected%9])
     }
 
@@ -232,26 +222,24 @@ function Game({socket}) {
       document.getElementById(element).classList.toggle('ishighlighted', true)
     })
 
+    highlightCells(sudokuArr[Math.floor(selected/9)][selected%9])
+  }
+
+  function highlightCells(value) {
+    //highlights cells with the same value
     for (let i = 0; i < 81; i++) {
       let cell = document.getElementById(i)
-      if (parseInt(cell.value) === sudokuArr[Math.floor(selected/9)][selected%9]) {
+      if (parseInt(cell.textContent) === value) {
         cell.classList.toggle('ishighlighted', false)
         cell.classList.toggle('isdigithighlighted', true)
       }
-      else
+      else {
         cell.classList.toggle('isdigithighlighted', false)
+      }
     }
-    forceUpdate()
   }
 
-  function onGridButtonClick(row, col) {
-    //Revert previously highlighted elements
-    document.getElementById(selected).classList.toggle('isselected', false)
-    
-    highlight.forEach(element => {
-      document.getElementById(element).classList.toggle('ishighlighted', false)
-    })
-    selected = (9*row+col)
+  function getSurroundingCells(row, col) {
     let row_array = [...Array(9).keys()].map(x => col+x*9);
     let col_array = [...Array(9).keys()].map(y => y+row*9);
     let square_array = []
@@ -262,7 +250,18 @@ function Game({socket}) {
     }
     let temp = []
     temp = temp.concat(row_array, col_array, square_array)
-    let uniqueCells = [...new Set(temp)] //remove duplicates from list
+    return [...new Set(temp)] //remove duplicates from list
+  }
+
+  function onGridButtonClick(row, col) {
+    //Revert previously highlighted elements
+    document.getElementById(selected).classList.toggle('isselected', false)
+    
+    highlight.forEach(element => {
+      document.getElementById(element).classList.toggle('ishighlighted', false)
+    })
+    selected = (9*row+col)
+    let uniqueCells = getSurroundingCells(row, col)
     highlight = uniqueCells
     uniqueCells.forEach(element => { //Toggle elements highlighted on grid
       document.getElementById(element).classList.toggle('ishighlighted', true)
@@ -272,16 +271,7 @@ function Game({socket}) {
     document.getElementById(9*row+col).classList.toggle('isselected', true)
 
     //highlights cells with the same value as the selected cell
-    for (let i = 0; i < 81; i++) {
-      let cell = document.getElementById(i)
-      if (parseInt(cell.textContent) === sudokuArr[row][col]) {
-        cell.classList.toggle('ishighlighted', false)
-        cell.classList.toggle('isdigithighlighted', true)
-      }
-      else {
-        cell.classList.toggle('isdigithighlighted', false)
-      }
-    }
+    highlightCells(sudokuArr[row][col])
   }
 
   const handleLeaveRoom = () => {

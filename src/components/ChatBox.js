@@ -8,7 +8,6 @@ const ChatBox = ({socket, roomId}) => {
 
   useEffect(()=> {
     socket.on("messageResponse", (data) => {
-      console.log("received message")
       setMessages([...messages, data])
     })
   }, [socket, messages])
