@@ -38,8 +38,8 @@ export default function HomePage({socket}) {
         closeTimeoutMS={400}
         style={{display: "block", overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
             <div>
-                <div class="ReactModalBody-header">
-                    <h2 class="modal-title">Create Room</h2>
+                <div className="ReactModalBody-header">
+                    <h2 className="modal-title">Create Room</h2>
                 </div>
                 <div className="ReactModalBody">
                     <form style={{marginTop:"5%"}} 
@@ -60,7 +60,7 @@ export default function HomePage({socket}) {
                             .catch((err)  => console.error(err));
                         }}>Create Room</button>
                 </div>
-                <div class="ReactModalBody-footer">
+                <div className="ReactModalBody-footer">
                     <button style={{background: '#FE4365', borderRadius: "6px", transform: "translate(-10px,-10px"}} type="button" class="btn btn-danger" data-dismiss="modal"
                     onClick={()=> setIsOpenCreate(false)}>Close</button>
                 </div>
@@ -74,8 +74,8 @@ export default function HomePage({socket}) {
         closeTimeoutMS={400}
         style={{overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
             <div>
-                <div class="ReactModalBody-header">
-                    <h2 class="modal-title">Join Room</h2>
+                <div claclassNamess="ReactModalBody-header">
+                    <h2 className="modal-title">Join Room</h2>
                 </div>
                 <div className="ReactModalBody">
                     <form style={{marginTop:"5%"}} 
@@ -107,7 +107,7 @@ export default function HomePage({socket}) {
                             .catch(error => console.error(error));
                         }}>Join Room</button>
                 </div>
-                <div class="ReactModalBody-footer">
+                <div className="ReactModalBody-footer">
                     <button style={{background: '#FE4365', borderRadius: "6px", transform: "translate(-10px,-10px"}} type="button" class="btn btn-danger" data-dismiss="modal"
                     onClick={()=> setIsOpenJoin(false)}>Close</button>
                 </div>

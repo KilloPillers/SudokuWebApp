@@ -1,12 +1,11 @@
 import '../App.css';
 import Counter from '../components/Counter';
 import Chatbox from '../components/ChatBox';
+import GameOver from '../components/GameOver';
 import React, {useState, useReducer, useEffect} from 'react';
 import ReactModal from 'react-modal';
-import { useLocation } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Axios from 'axios';
-import moment from 'moment';
 
 let selected = 0
 
@@ -89,14 +88,15 @@ function SolveSudoku(index){
 function Game({socket}) {
   let [, forceUpdate] = useReducer(x => x + 1, 0)
   let [sudokuArr, setSudokuArr] = useState(initial)
-  let [unsolvedCount, setUnsolvedCount] = useState(0)
-  let [isGameOver, setGameOver] = useState(false)
-  let [roomId, setRoomId] = useState(useLocation().pathname.split("/")[2]);
-  let [startTime, setStartTime] = useState()
-  let [userName, setUserName] = useState(localStorage.getItem("userName"))
+  const [unsolvedCount, setUnsolvedCount] = useState(0) //refactor code to use a useRef Hook
+  const [isGameOver, setGameOver] = useState(false)
+  const [roomId, ] = useState(useLocation().pathname.split("/")[2]);
+  const [startTime, setStartTime] = useState()
+  const [userName, setUserName] = useState(localStorage.getItem("userName"))
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(userName)
     if (userName !== null)
       socket.emit("join-room", userName, roomId)
     Axios.get('http://localhost:3000/joinRoom/' + roomId)
@@ -116,8 +116,7 @@ function Game({socket}) {
         else
           cell.classList.toggle('iswrong', true)
       }
-      unsolvedCount += count
-      setUnsolvedCount(unsolvedCount)
+      setUnsolvedCount(count)
       console.log(`There are ${unsolvedCount} unsolved tiles left`)
       setStartTime(response.data.time)
       setSudokuArr(sudokuArr)
@@ -126,12 +125,23 @@ function Game({socket}) {
     .catch(error => console.error(error));
 
     socket.on("sudoku-update", (selected, value) => {
+      /*
+        Refactor Code to use this instead:
+
+        const updatedSudokuArr = sudokuArr.map((row, i) =>
+          i === 1 ? [...row.slice(0, 2), newValue, ...row.slice(3)] : row //where 1 and 2 are row and column respectively
+        );
+        setSudokuArr(updatedSudokuArr);
+
+        Compliments of ChatGPT.
+      */
+
       sudokuArr[Math.floor(selected/9)][selected%9] = value;
       initial[Math.floor(selected/9)][selected%9] = value;
       let cell = document.getElementById(selected)
       if (solved_sudoku[Math.floor(selected/9)][selected%9] === value || value === 0) {
         if (solved_sudoku[Math.floor(selected/9)][selected%9] === value)
-          setUnsolvedCount(unsolvedCount-1)
+          setUnsolvedCount(prevUncount => prevUncount - 1)
         cell.classList.toggle('iswrong', false)
       }
       else
@@ -141,7 +151,7 @@ function Game({socket}) {
     });
 
     socket.on("NoRoomFound", ()=> {
-      Navigate("/home")
+      navigate("/home")
     })
 
     let hasKeydownListener = false;
@@ -164,6 +174,10 @@ function Game({socket}) {
       document.removeEventListener('keydown', keydownListener, false);
       hasKeydownListener = false;
     });
+
+    window.addEventListener("beforeunload", () => {
+      socket.emit("leave-room", userName, roomId)
+    })
 
     return () => {
       document.removeEventListener('keydown', keydownListener, false);
@@ -205,7 +219,6 @@ function Game({socket}) {
         if (unsolvedCount === 0) {
           setGameOver(true)
         }
-        console.log(unsolvedCount)
         let cell = document.getElementById(selected)
         cell.classList.toggle('iswrong', false)
         cell.classList.toggle('ishighlighted', false)
@@ -271,6 +284,11 @@ function Game({socket}) {
     }
   }
 
+  const handleLeaveRoom = () => {
+    socket.emit("leave-room", userName, roomId)
+    navigate('/home')
+  }
+
   return (
     <>
     <ReactModal 
@@ -280,14 +298,15 @@ function Game({socket}) {
       closeTimeoutMS={400}
       style={{display: "block", overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
       <div>
-          <div class="ReactModalBody-header">
-              <h2 class="modal-title">Game Finished</h2>
+          <div className="ReactModalBody-header">
+              <h2 class="modal-title" style={{padding: "10px"}}>Game Finished</h2>
           </div>
           <div className="ReactModalBody">
-              
+            <GameOver roomId={roomId}></GameOver>
           </div>
-          <div class="ReactModalBody-footer">
-          
+          <div className="ReactModalBody-footer" style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-around', padding: '20px'}}>
+            <button onClick={handleLeaveRoom}>Leave Room</button>
+            <button>Play Again</button>
           </div>
       </div>
     </ReactModal>
@@ -298,7 +317,7 @@ function Game({socket}) {
       closeTimeoutMS={400}
       style={{display: "block", overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
           <div>
-              <div class="ReactModalBody-header">
+              <div className="ReactModalBody-header">
                   <h2 class="modal-title">Joining Room</h2>
               </div>
               <div className="ReactModalBody">
@@ -319,10 +338,11 @@ function Game({socket}) {
                     localStorage.setItem("userName", username)
                     setUserName(username)
                     socket.emit("join-room", username, roomId)
-                  }}>Enter</button>
+                  }}>Enter
+                  </button>
               </div>
-              <div class="ReactModalBody-footer">
-
+              <div className="ReactModalBody-footer">
+                  <span></span>
               </div>
           </div>
       </ReactModal>
@@ -336,6 +356,7 @@ function Game({socket}) {
             notesMode = !notesMode
           }}>Enable Notes</button>
           <button onClick={() => {
+            setGameOver(true)
           }}>Invite</button>
         </div>
         <div className='Sudoku-container'>

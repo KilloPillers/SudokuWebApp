@@ -25,7 +25,7 @@ let puzzles = readFileSync("smallsudoku.txt", 'utf-8').split('\n')
 const rooms = {}
 
 app.get('/', (req, res) => {
-  res.send('<h1>Hello world</h1>');
+  res.send('<a href="https://youtu.be/7hpFYz45Odg?t=7"> you\'re not supposed to be here</a>');
 });
 
 app.get('/data', (req, res) => {
@@ -43,38 +43,49 @@ app.get('/roomExists/:roomId', (req, res) => {
     res.send(false)
 })
 
+app.get('/userData/:roomId', (req, res) => {
+  res.send(rooms[req.params.roomId].users)
+})
+
 app.post('/createRoom', function(req, res) {
   let RandomSudoku = puzzles[Math.floor(Math.random()*puzzles.length)].split(",");
   let unsolvedSudoku = RandomSudoku[0].split("").map(Number)
   let solvedSudoku = RandomSudoku[1].split("").map(Number)
+
   // Generate a new room ID
-  let roomId = Math.random().toString(36).toUpperCase().replace(/[0-9O]/g, '').substring(1,7)
-  //console.log(req)
+  let roomId = '';
+  const characters = 'ABCDEFGHIJKLMNPQRSTUVWXYZ'; // excludes the letter 'O'
+
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    roomId += characters.charAt(randomIndex);
+  }
+
   // Add the new room to the dictionary of rooms
   rooms[roomId] = {time: req.body.startTime,
-                  id: roomId, 
+                  id: roomId,
+                  users: {},
                   unsolvedPuzzle: unsolvedSudoku,
                   solvedPuzzle: solvedSudoku};
-
-  //console.log(`New room created: \n name: ${rooms[roomId].name} \n id: ${rooms[roomId].id}\n 
-  //             unsolvedPuzzle: ${rooms[roomId].unsolvedPuzzle}\n solvedPuzzle: ${rooms[roomId].solvedPuzzle}`);
+  
   res.send(JSON.stringify({id: roomId}))
+  console.log(`New room created: ${roomId}`)
 })
-
-//puzzles[Math.floor(Math.random()*puzzles.length)]
 
 io.on('connection', (socket) => {
     console.log('A user connected: ', socket.id)
 
     socket.on("game-over", (roomId) => {
 
-
     }) 
 
     socket.on("sudoku-change", (user, roomId, selected, value) => {
-        //console.log("Sudoku: ", sudoku_data,  " ", socketID)
-        console.log(user, roomId, selected, value)
-
+        console.log(`${user} in ${roomId} put ${value} at position ${selected}`)
+        if (value !== 0)
+          if (rooms[roomId].solvedPuzzle[selected] === value)
+            rooms[roomId].users[user].correctCount++
+          else
+            rooms[roomId].users[user].incorrectCount++
 
         rooms[roomId].unsolvedPuzzle[selected] = value
         socket.to(roomId).emit("sudoku-update", selected, value)
@@ -93,37 +104,22 @@ io.on('connection', (socket) => {
       }
       socket.leaveAll();
       socket.join(roomId);
+      if (!rooms[roomId].users.hasOwnProperty(userName))
+        rooms[roomId].users[userName] = {correctCount: 0, incorrectCount: 0}
       console.log(`Socket: ${socket.id} with username: "${userName}" joined room: ${roomId}`);
-      io.to(socket.id).emit("room-data", rooms[roomId]);//see if you could do this with an express endpoint
     })
 
-    socket.on("leave-room", (roomId)=>{
+    socket.on("leave-room", (userName, roomId)=>{
+      console.log(`${userName} left room ${roomId}`);
       socket.leave(roomId);
-      console.log(`Client left room ${roomId}`);
+      if (rooms.hasOwnProperty(roomId))
+        delete rooms[roomId].users[userName]
     })
-
-    socket.on("create-room", (roomData) => {
-      socket.leaveAll();
-      let RandomSudoku = puzzles[Math.floor(Math.random()*puzzles.length)].split(",");
-      let unsolvedSudoku = RandomSudoku[0].split("").map(Number)
-      let solvedSudoku = RandomSudoku[1].split("").map(Number)
-      // Generate a new room ID
-      const roomId = Math.random().toString(36).substr(2, 9);
-      // Add the new room to the dictionary of rooms
-      rooms[roomId] = {name: roomData.roomName, 
-                      unsolvedPuzzle: unsolvedSudoku,
-                      solvedPuzzle: solvedSudoku};
-      // Notify all clients of the new room's existence
-      //io.emit("room created", roomId);
-      console.log(`New room created: ${roomId} - ${rooms[roomId].name} | ${rooms[roomId].unsolvedPuzzle}`);
-    });
 
     socket.on("disconnect", ()=>{
       console.log("Client Disconnected");
     })
 })
-
-//io.emit("user_connecting", puzzles[Math.floor(Math.random()*puzzles.length)])
 
 server.listen(3000, () => {
   console.log('listening on *:3000');
