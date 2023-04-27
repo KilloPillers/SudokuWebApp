@@ -6,7 +6,6 @@ import React, {useState, useRef, useEffect} from 'react';
 import ReactModal from 'react-modal';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { updateLocale } from 'moment';
 
 let selected = 0
 
