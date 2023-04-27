@@ -1,4 +1,4 @@
-import { HashRouter as Routes , Route } from "react-router-dom"
+import { HashRouter, Routes , Route } from "react-router-dom"
 import React from 'react'
 import {io} from 'socket.io-client'
 import HomePage from './pages/HomePage'
@@ -16,14 +16,14 @@ const socket = io("http://localhost:3000", {
 export default function App() {
   return (
     <div>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route index element={<HomePage socket={socket}/>}/>
           <Route path="/home" element={<HomePage socket={socket}/>} />
           <Route path="/room/*" element={<Game socket={socket}/>}/>
           <Route path="*" element={<NoPage socket={socket}/>}/>
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </div>
   )
 }

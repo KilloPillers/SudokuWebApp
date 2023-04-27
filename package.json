@@ -1,7 +1,7 @@
 {
   "name": "sudoku-app",
   "version": "0.1.0",
-  "homepage": "onlinesudoku.us",
+  "homepage": "https://www.onlinesudoku.us/",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.4",
