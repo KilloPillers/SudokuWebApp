@@ -6,6 +6,7 @@ import React, {useState, useRef, useEffect} from 'react';
 import ReactModal from 'react-modal';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { updateLocale } from 'moment';
 
 let selected = 0
 
@@ -13,29 +14,9 @@ let notesMode = false
 
 //TODO: Refactor all code to use a 1D array instead of 2D array.
 
-let initial = [
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0]
-]
+let unsolved_sudoku = Array.from({length: 81}, () => 0);
 
-let solved_sudoku = [
-  [4, 5, 1, 9, 7, 3, 8, 6, 2],
-  [8, 9, 2, 1, 4, 6, 3, 5, 7],
-  [7, 6, 3, 2, 8, 5, 1, 9, 4],
-  [5, 3, 8, 6, 2, 7, 9, 4, 1],
-  [6, 2, 4, 3, 9, 1, 7, 8, 5],
-  [1, 7, 9, 8, 5, 4, 6, 2, 3],
-  [9, 8, 7, 4, 1, 2, 5, 3, 6],
-  [3, 4, 5, 7, 6, 8, 2, 1, 9],
-  [2, 1, 6, 5, 3, 9, 4, 7, 8]
-]
+let solved_sudoku = Array.from({length: 81}, () => 0);
 
 let highlight = []
 
@@ -88,38 +69,33 @@ function SolveSudoku(index){
 */
 
 function Game({socket}) {
-  let [sudokuArr, setSudokuArr] = useState(initial) //refactor code to make this a const
-  let unsolvedCount = useRef(0)
+  const [sudokuArr, setSudokuArr] = useState(unsolved_sudoku) //refactor code to make this a const
   const [isGameOver, setGameOver] = useState(false)
   const [roomId, ] = useState(useLocation().pathname.split("/")[2]);
   const [startTime, setStartTime] = useState()
   const [userName, setUserName] = useState(localStorage.getItem("userName"))
+  let unsolvedCount = useRef(0)
 
   const navigate = useNavigate();
 
   useEffect(() => {
     async function getSudoku() {
-      await axios.get('http://localhost:3000/joinRoom/' + roomId)
+      await axios.get(`http://localhost:3000/joinRoom/${roomId}`)
       .then(response => {
-        const arr = response.data.unsolvedPuzzle
-        const copy = response.data.unsolvedPuzzle.slice() //this copy exist only to use splice later (a mutable function)
-        const newArr = [];
-        while (copy.length)
-          newArr.push(copy.splice(0,9));
+        const unsolvedPuzzle = response.data.unsolvedPuzzle
         const solvedPuzzle = response.data.solvedPuzzle
         let count = 0
         for (let i = 0; i < 81; i++) {
-          if (arr[i] === 0) 
+          if (unsolvedPuzzle[i] === 0) 
             count++
-          initial[Math.floor(i/9)][i%9] = arr[i];
-          solved_sudoku[Math.floor(i/9)][i%9] = solvedPuzzle[i];
+          unsolved_sudoku[i] = unsolvedPuzzle[i]
+          solved_sudoku[i] = solvedPuzzle[i];
           let cell = document.getElementById(i)
-          cell.classList.toggle('iswrong', !(solvedPuzzle[i] === arr[i] || arr[i] === 0))
+          cell.classList.toggle('iswrong', !(solvedPuzzle[i] === unsolvedPuzzle[i] || unsolvedPuzzle[i] === 0))
         }
         unsolvedCount = count
-        console.log(`There are ${unsolvedCount} unsolved tiles left`)
         setStartTime(response.data.time)
-        setSudokuArr(newArr)
+        setSudokuArr(unsolvedPuzzle)
       })
       .catch(error => console.error(error));
     }
@@ -127,21 +103,20 @@ function Game({socket}) {
   }, [])
 
   useEffect(() => {
-    if (userName !== null) {}
+    if (userName !== null)
       socket.emit("join-room", userName, roomId)
 
     if (socket.listeners("sudoku-update").length === 0)
-      socket.on("sudoku-update", (selected, value) => {  
-        const updatedSudokuArr = sudokuArr.map((row, i) =>
-          i === Math.floor(selected/9) ? [...row.slice(0, selected%9), value, ...row.slice((selected%9)+1)] : row //where 1 and 2 are row and column respectively
-        );
+      socket.on("sudoku-update", (selected, value) => {
+        unsolved_sudoku[selected] = value
+        const updatedSudokuArr = sudokuArr.slice()[selected] = value
         setSudokuArr(updatedSudokuArr);
   
-        initial[Math.floor(selected/9)][selected%9] = value;
         let cell = document.getElementById(selected)
-        if (solved_sudoku[Math.floor(selected/9)][selected%9] === value || value === 0) {
-          if (solved_sudoku[Math.floor(selected/9)][selected%9] === value)
-          console.log(`There are ${--unsolvedCount} unsolved tiles left`)
+        if (solved_sudoku[selected] === value || value === 0) {
+          if (solved_sudoku[selected] === value)
+            if (--unsolvedCount === 0)
+              setGameOver(true)
           cell.classList.toggle('iswrong', false)
         }
         else
@@ -157,7 +132,7 @@ function Game({socket}) {
 
     let hasKeydownListener = false;
 
-    // Define your keydown event listener function
+    // Define keydown event listener function
     const keydownListener = (e) => {
       if (parseInt(e.key)) {
         onNumberButtonClick(parseInt(e.key))
@@ -182,7 +157,6 @@ function Game({socket}) {
     })
 
     return () => {
-      handleLeaveRoom()
       document.removeEventListener('keydown', keydownListener, false);
       hasKeydownListener = false;
     };
@@ -190,43 +164,32 @@ function Game({socket}) {
   }, [socket])
 
   function onNumberButtonClick(val) {
-    if (solved_sudoku[Math.floor(selected/9)][selected%9] === sudokuArr[Math.floor(selected/9)][selected%9])
+    if (solved_sudoku[selected] === sudokuArr[selected]) //if we are in an already solved tile do nothing
       return
-    if (notesMode) {
+    if (notesMode) { //if we are in notes mode update the tile's note grid
       let item = document.getElementById(selected+'-'+val)
       item.textContent = (item.textContent === '' ? val:'')
     }
-    else {
-      if (solved_sudoku[Math.floor(selected/9)][selected%9] !== val) {
-        initial[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? 0 : val
-        let cell = document.getElementById(selected)
-        cell.classList.toggle('iswrong', initial[Math.floor(selected/9)][selected%9] === val)
-        cell.classList.toggle('ishighlighted', false)
-        cell.classList.toggle('isdigithighlighted', false)
+    else { //Otherwise...
+      const updatedSudokuArr = sudokuArr.slice()
+      updatedSudokuArr[selected] = unsolved_sudoku[selected] === val ? 0 : val
+      unsolved_sudoku[selected] = unsolved_sudoku[selected] === val ? 0 : val
+      setSudokuArr(updatedSudokuArr)
+      if (solved_sudoku[selected] === val) {
+        propogateNoteUpdate(val)
+        console.log(`There are ${--unsolvedCount} unsolved tiles left`)
       }
-      else {
-        sudokuArr[Math.floor(selected/9)][selected%9] = sudokuArr[Math.floor(selected/9)][selected%9] === val ? 0 : val
-        highlight.forEach(element => {
-          let item = document.getElementById(element+'-'+val)
-          if (item !== null)
-            item.textContent = ''
-        })
-        if (unsolvedCount === 0) {
-          setGameOver(true)
-        }
-        let cell = document.getElementById(selected)
-        cell.classList.toggle('iswrong', false)
-        cell.classList.toggle('ishighlighted', false)
-        cell.classList.toggle('isdigithighlighted', true)
-      }
-      socket.emit("sudoku-change", userName, roomId, selected, sudokuArr[Math.floor(selected/9)][selected%9])
+      if (unsolvedCount === 0)
+        setGameOver(true)
+      let cell = document.getElementById(selected)
+      cell.classList.toggle('iswrong', !(solved_sudoku[selected] === val || unsolved_sudoku[selected] === 0))
+      cell.classList.toggle('ishighlighted', false)
+      socket.emit("sudoku-change", userName, roomId, selected, updatedSudokuArr[selected])
     }
-
     highlight.forEach(element => {
       document.getElementById(element).classList.toggle('ishighlighted', true)
     })
-
-    highlightCells(sudokuArr[Math.floor(selected/9)][selected%9])
+    highlightCells(sudokuArr[selected])
   }
 
   function highlightCells(value) {
@@ -241,6 +204,14 @@ function Game({socket}) {
         cell.classList.toggle('isdigithighlighted', false)
       }
     }
+  }
+
+  function propogateNoteUpdate(val) { //handles the removal of a number on the notes grid of a cell
+    highlight.forEach(element => {
+      let item = document.getElementById(element+'-'+val)
+      if (item !== null)
+        item.textContent = ''
+    })
   }
 
   function getSurroundingCells(row, col) {
@@ -275,7 +246,7 @@ function Game({socket}) {
     document.getElementById(9*row+col).classList.toggle('isselected', true)
 
     //highlights cells with the same value as the selected cell
-    highlightCells(sudokuArr[row][col])
+    highlightCells(sudokuArr[9*row+col])
   }
 
   const handleLeaveRoom = () => {
@@ -366,10 +337,10 @@ function Game({socket}) {
                         <button 
                         onClick={()=>onGridButtonClick(row,col)} 
                         id={9*row+col}
-                        value={sudokuArr[row][col] === 0 ? '' : sudokuArr[row][col]} 
+                        value={sudokuArr[9*row+col] === 0 ? '' : sudokuArr[9*row+col]} 
                         className={'cell-complete'}
-                        >{sudokuArr[row][col] === 0 ? <div className='cell-note-grid'>{[1,2,3,4,5,6,7,8,9].map((i) => {
-                          return <div id={9*row+col+'-'+i} className='cell-subgrid'>{''}</div>})}</div> : sudokuArr[row][col]}
+                        >{sudokuArr[9*row+col] === 0 ? <div className='cell-note-grid'>{[1,2,3,4,5,6,7,8,9].map((i) => {
+                          return <div id={9*row+col+'-'+i} className='cell-subgrid'>{''}</div>})}</div> : sudokuArr[9*row+col]}
                         </button>
                       </td>
                       })}

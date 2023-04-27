@@ -75,10 +75,6 @@ app.post('/createRoom', function(req, res) {
 io.on('connection', (socket) => {
     console.log('A user connected: ', socket.id)
 
-    socket.on("game-over", (roomId) => {
-
-    }) 
-
     socket.on("sudoku-change", (user, roomId, selected, value) => {
         console.log(`${socket.id} in ${roomId} put ${value} at position ${selected}`)
         if (value !== 0)
@@ -97,7 +93,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on("join-room", (userName, roomId)=>{
-      socket.leaveAll();
       if (!rooms.hasOwnProperty(roomId)) {
         console.log(`Socket: ${socket.id} attempted to join room that does not exist`)
         io.to(socket.id).emit("NoRoomFound")
