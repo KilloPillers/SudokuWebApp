@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.css": "/static/css/main.cc25dff7.css",
-    "main.js": "/static/js/main.139d5e2b.js",
-    "static/media/homepage-spash.svg": "/static/media/homepage-spash.a245b98911df62fdcbf68ecb55d615fc.svg",
-    "index.html": "/index.html",
-    "main.cc25dff7.css.map": "/static/css/main.cc25dff7.css.map",
-    "main.139d5e2b.js.map": "/static/js/main.139d5e2b.js.map"
+    "main.css": "/www.onlinesudoku.us/static/css/main.cc25dff7.css",
+    "main.js": "/www.onlinesudoku.us/static/js/main.13239c58.js",
+    "static/media/homepage-spash.svg": "/www.onlinesudoku.us/static/media/homepage-spash.a245b98911df62fdcbf68ecb55d615fc.svg",
+    "index.html": "/www.onlinesudoku.us/index.html",
+    "main.cc25dff7.css.map": "/www.onlinesudoku.us/static/css/main.cc25dff7.css.map",
+    "main.13239c58.js.map": "/www.onlinesudoku.us/static/js/main.13239c58.js.map"
   },
   "entrypoints": [
     "static/css/main.cc25dff7.css",
-    "static/js/main.139d5e2b.js"
+    "static/js/main.13239c58.js"
   ]
 }
