@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes , Route } from "react-router-dom"
+import { HashRouter as Routes , Route } from "react-router-dom"
 import React from 'react'
 import {io} from 'socket.io-client'
 import HomePage from './pages/HomePage'
