@@ -1,5 +1,5 @@
 const express = require('express');
-const port = 3000
+const port = 3002
 const cors = require('cors')
 const {readFileSync} = require('fs')
 const app = express();
@@ -10,7 +10,7 @@ const bodyParse = require("body-parser");
 const { setTimeout } = require('timers');
 const io = require("socket.io")(server, {
     cors: {
-      origin: "http://localhost:3001",
+      origin: "https://onlinesudoku.us/",
       methods: ["GET", "POST"],
       allowedHeaders: ["my-custom-header"],
       credentials: true

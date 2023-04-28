@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image
-FROM node:18-alpine
+FROM node:slim
 
 ENV NODE_ENV=production
 
@@ -8,6 +8,8 @@ WORKDIR /app
 
 # Copy the current directory contents into the container at /app
 COPY . /app
+
+COPY /server/smallsudoku.txt /app
 
 # Install any needed packages specified in package.json
 RUN npm install
