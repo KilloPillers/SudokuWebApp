@@ -5,8 +5,7 @@ import HomePage from './pages/HomePage'
 import Game from './pages/GamePage'
 import NoPage from './pages/NoPage'
 
-
-const socket = io("http://localhost:3000", {
+const socket = io(process.env.REACT_APP_NODE_SERVER, {
   withCredentials: true,
   extraHeaders: {
     "my-custom-header": "abcd"

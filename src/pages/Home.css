@@ -43,6 +43,8 @@ input {
 }
 
 .ReactModalBody{
+    display: flex;
+    flex-direction: column;
     text-align: center;
     width: auto;
     height: auto;
@@ -64,6 +66,9 @@ input {
 }
 
 .ReactModalBody-footer{
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-end;
     text-align: right;
     position: relative;
     overflow: hidden;
@@ -71,7 +76,7 @@ input {
     height: auto;
     background-color: #40414f;
     border-radius: 4px;
-    font-size: 250%;
+    font-size: 100%;
 }
 
 .HomeBody{

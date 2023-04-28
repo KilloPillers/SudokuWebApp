@@ -10,13 +10,13 @@ import moment from "moment"
 import spash from '../homepage-spash.svg'
 
 let sudokuArr = [
-    [4, 5, 1, 9, 7, 3, 8, 6, 2],
+    ['W', 'E', 'L', 'C', 'O', 'M', 'E', 6, 2],
     [8, 9, 2, 1, 4, 6, 3, 5, 7],
-    [7, 6, 3, 2, 8, 5, 1, 9, 4],
+    [7, 6, 3, 2, 'T', 'O', 1, 9, 4],
     [5, 3, 8, 6, 2, 7, 9, 4, 1],
-    [6, 2, 4, 3, 9, 1, 7, 8, 5],
+    [6, 'O', 'N', 'L', 'I', 'N', 'E', 8, 5],
     [1, 7, 9, 8, 5, 4, 6, 2, 3],
-    [9, 8, 7, 4, 1, 2, 5, 3, 6],
+    [9, 8, 7, 'S', 'U', 'D', 'O', 'K', 'U'],
     [3, 4, 5, 7, 6, 8, 2, 1, 9],
     [2, 1, 6, 5, 3, 9, 4, 7, 8]
   ]
@@ -45,12 +45,14 @@ export default function HomePage({socket}) {
                     onSubmit={(event)=>{
                             event.preventDefault();
                         }}>
-                        <label style={{fontSize:20, padding:15}} for="uerName">User Name</label>
-                        <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="userName" name="roomName"></input>
+                        <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                            <label style={{fontSize:20, padding:15}} for="uerName">User Name</label>
+                            <input style={{background: "#40414f", border: "#ffffff", textAlign: "center", margin: "20px"}} type="text" id="userName" name="roomName"></input>
+                        </div>
                     </form>
-                    <button style={{margin: 10}} onClick={()=>{
+                    <button style={{margin: 10, width: "25%", alignSelf: "center"}} onClick={()=>{
                             localStorage.setItem("userName", document.getElementById("userName").value)
-                            axios.post("http://localhost:3000/createRoom", {
+                            axios.post(process.env.REACT_APP_NODE_SERVER+"/createRoom", {
                                 startTime: moment().unix()
                             })
                             .then((response) => {
@@ -60,7 +62,7 @@ export default function HomePage({socket}) {
                         }}>Create Room</button>
                 </div>
                 <div className="ReactModalBody-footer">
-                    <button style={{background: '#FE4365', borderRadius: "6px", transform: "translate(-10px,-10px"}} type="button" class="btn btn-danger" data-dismiss="modal"
+                    <button style={{background: '#FE4365', borderRadius: "6px", margin: "10px"}} type="button" class="btn btn-danger" data-dismiss="modal"
                     onClick={()=> setIsOpenCreate(false)}>Close</button>
                 </div>
             </div>
@@ -73,7 +75,7 @@ export default function HomePage({socket}) {
         closeTimeoutMS={400}
         style={{overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
             <div>
-                <div claclassNamess="ReactModalBody-header">
+                <div className="ReactModalBody-header">
                     <h2 className="modal-title">Join Room</h2>
                 </div>
                 <div className="ReactModalBody">
@@ -81,22 +83,22 @@ export default function HomePage({socket}) {
                     onSubmit={(event)=>{
                             event.preventDefault();
                         }}>
-                        <div>
+                        <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
                             <label style={{fontSize:20, padding:15}} for="userName">User Name</label>
-                            <input style={{background: "#40414f", border: "#ffffff", textAlign: "center"}} type="text" id="userName" name="userName"></input>
+                            <input style={{background: "#40414f", border: "#ffffff", textAlign: "center", width: "45%"}} type="text" id="userName" name="userName" value={localStorage.getItem("userName")}></input>
                         </div>
                         <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
                             <label style={{fontSize:20}} for="roomId">Room Code</label>
                             <input style={{background: "#40414f", border: "#ffffff", textAlign: "center", width: "25%"}} type="text" id="roomId" name="roomId"></input>
                         </div>
                     </form>
-                    <button style={{margin: 10}} onClick={()=>{
+                    <button style={{margin: 10, width: "25%", alignSelf: "center"}} onClick={()=>{
                             let roomId = document.getElementById("roomId").value
                             let userName = document.getElementById("userName").value
                             if (roomId === '' || userName === '')
                                 return
                             localStorage.setItem("userName", userName)
-                            axios.get("http://localhost:3000/roomExists/" + roomId)
+                            axios.get(process.env.REACT_APP_NODE_SERVER+`/roomExists/${roomId}`)
                             .then(response => {
                                 if (response.data)
                                     navigate(`/room/${roomId}`)
@@ -107,7 +109,7 @@ export default function HomePage({socket}) {
                         }}>Join Room</button>
                 </div>
                 <div className="ReactModalBody-footer">
-                    <button style={{background: '#FE4365', borderRadius: "6px", transform: "translate(-10px,-10px"}} type="button" class="btn btn-danger" data-dismiss="modal"
+                    <button style={{background: '#FE4365', borderRadius: "6px", margin: "10px"}} type="button" class="btn btn-danger" data-dismiss="modal"
                     onClick={()=> setIsOpenJoin(false)}>Close</button>
                 </div>
             </div>
@@ -150,7 +152,8 @@ export default function HomePage({socket}) {
                                         return <td key={rIndex+cIndex} className={(col + 1) % 3 === 0 && col !== 8 ? 'rBorder':'grid-cell'}>
                                         <button 
                                         id={9*row+col}
-                                        value={sudokuArr[row][col] === 0 ? '' : sudokuArr[row][col]} 
+                                        value={sudokuArr[row][col]} 
+                                        style={typeof sudokuArr[row][col] === 'string' ? {background: "grey", color: "white", fontSize: "35px", fontWeight: "bold"} : {}}
                                         className={'cell-complete'}
                                         >{sudokuArr[row][col]}
                                         </button>
@@ -167,7 +170,7 @@ export default function HomePage({socket}) {
             </div>
         </div>
         <div className="footer" style={{ backgroundColor: '#333', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-            <p>&copy; 2023 My Website</p>
+            <p>&copy; 2023 Online Sudoku</p>
         </div>
         </>
     );

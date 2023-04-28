@@ -9,67 +9,19 @@ import axios from 'axios';
 
 let selected = 0
 
-let notesMode = false
-
-//TODO: Refactor all code to use a 1D array instead of 2D array.
-
 let unsolved_sudoku = Array.from({length: 81}, () => 0);
 
 let solved_sudoku = Array.from({length: 81}, () => 0);
 
+let notesEnabled = false
+
 let highlight = []
-
-/*
-function getDeepCopy(arr) {
-  return JSON.parse(JSON.stringify(arr))
-}
-
-function isValid(digit, index){
-  for (let y = 0; y < 9; y++) { // Check Column
-    if (initial[y][index%9] === digit)
-      return false
-  }
-
-  let row = parseInt(index/9) //Check Row
-  for (let x = 0; x < 9; x++) {
-    if (initial[row][x] === digit)
-      return false
-  }
-
-  //Check 3x3 Subgrid
-  for (let y = Math.floor(Math.floor(index/9)/3)*3; y < Math.floor(Math.floor(index/9)/3)*3+3; y++){
-    for (let x = Math.floor((index%9)/3)*3; x < Math.floor((index%9)/3)*3+3; x++) {
-      if (initial[y][x] === digit)
-        return false
-    }
-  }
-  return true
-}
-
-function SolveSudoku(index){
-  if (index === 81)
-    solved_sudoku = getDeepCopy(initial)
-  for (let i = index; i < 81; i++) {
-    if (initial[parseInt(i/9)][i%9] !== 0)
-      continue //Digit is given as part of solution
-    for (let digit = 1; digit < 10; digit++) {
-      if (isValid(digit, i)) {
-        initial[parseInt(i/9)][i%9] = digit
-        SolveSudoku(i+1)
-        if (solved_sudoku === false)
-          initial[parseInt(i/9)][i%9] = 0
-        else 
-          return
-      }
-    }
-    return //No solution existed
-  }
-}
-*/
 
 function Game({socket}) {
   const [sudokuArr, setSudokuArr] = useState(unsolved_sudoku) //refactor code to make this a const
   const [isGameOver, setGameOver] = useState(false)
+  const [isInviting, setInviting] = useState(false)
+  const [notesMode, setNotesMode] = useState(false);
   const [roomId, ] = useState(useLocation().pathname.split("/")[2]);
   const [startTime, setStartTime] = useState()
   const [userName, setUserName] = useState(localStorage.getItem("userName"))
@@ -79,7 +31,7 @@ function Game({socket}) {
 
   useEffect(() => {
     async function getSudoku() {
-      await axios.get(`http://localhost:3000/joinRoom/${roomId}`)
+      await axios.get(process.env.REACT_APP_NODE_SERVER+`/joinRoom/${roomId}`)
       .then(response => {
         const unsolvedPuzzle = response.data.unsolvedPuzzle
         const solvedPuzzle = response.data.solvedPuzzle
@@ -128,14 +80,12 @@ function Game({socket}) {
         navigate("/home")
       })
     
-
     let hasKeydownListener = false;
 
     // Define keydown event listener function
     const keydownListener = (e) => {
-      if (parseInt(e.key)) {
+      if (parseInt(e.key)) 
         onNumberButtonClick(parseInt(e.key))
-      }
     };
 
     // Add the event listener to the document if it hasn't been added yet
@@ -144,19 +94,9 @@ function Game({socket}) {
       hasKeydownListener = true;
     }
 
-    // Remove the event listener when the page is unloaded
-    window.addEventListener('unload', () => {
-      socket.emit("leave-room", userName, roomId)
-      document.removeEventListener('keydown', keydownListener, false);
-      hasKeydownListener = false;
-    });
-
-    window.addEventListener("beforeunload", () => {
-      socket.emit("leave-room", userName, roomId)
-    })
-
     return () => {
       document.removeEventListener('keydown', keydownListener, false);
+      socket.emit("leave-room", userName, roomId)
       hasKeydownListener = false;
     };
     
@@ -165,7 +105,7 @@ function Game({socket}) {
   function onNumberButtonClick(val) {
     if (solved_sudoku[selected] === sudokuArr[selected]) //if we are in an already solved tile do nothing
       return
-    if (notesMode) { //if we are in notes mode update the tile's note grid
+    if (notesEnabled) { //if we are in notes mode update the tile's note grid
       let item = document.getElementById(selected+'-'+val)
       item.textContent = (item.textContent === '' ? val:'')
     }
@@ -217,11 +157,9 @@ function Game({socket}) {
     let row_array = [...Array(9).keys()].map(x => col+x*9);
     let col_array = [...Array(9).keys()].map(y => y+row*9);
     let square_array = []
-    for (let y = parseInt(row/3)*3; y < parseInt(row/3)*3+3; y++){
-      for (let x = parseInt(col/3)*3; x < parseInt(col/3)*3+3; x++) {
+    for (let y = parseInt(row/3)*3; y < parseInt(row/3)*3+3; y++)
+      for (let x = parseInt(col/3)*3; x < parseInt(col/3)*3+3; x++) 
           square_array.push(9*y+x)
-      }
-    }
     let temp = []
     temp = temp.concat(row_array, col_array, square_array)
     return [...new Set(temp)] //remove duplicates from list
@@ -258,6 +196,27 @@ function Game({socket}) {
   return (
     <>
     <ReactModal 
+      isOpen={isInviting} 
+      onRequestClose={()=>setInviting(false)}
+      contentLabel="Example Modal" 
+      className={"portal"}
+      closeTimeoutMS={400}
+      style={{display: "block", overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
+      <div>
+          <div className="ReactModalBody-header">
+            <h2 className="modal-title" style={{padding: "10px"}}>Invite Link</h2>
+          </div>
+          <div className="ReactModalBody">
+            <h2 id="InviteLink">{useLocation().pathname}</h2>
+          </div>
+          <div className="ReactModalBody-footer" style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-around', padding: '20px'}}>
+            <button onClick={()=> {
+              navigator.clipboard.writeText(`/room/${roomId}`)
+            }}>Copy to Clipboard</button>
+          </div>
+      </div>
+    </ReactModal>
+    <ReactModal 
       isOpen={isGameOver} 
       contentLabel="Example Modal" 
       className={"portal"}
@@ -265,14 +224,13 @@ function Game({socket}) {
       style={{display: "block", overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
       <div>
           <div className="ReactModalBody-header">
-              <h2 class="modal-title" style={{padding: "10px"}}>Game Finished</h2>
+              <h2 className="modal-title" style={{padding: "10px"}}>Game Finished</h2>
           </div>
           <div className="ReactModalBody">
             <GameOver roomId={roomId}></GameOver>
           </div>
           <div className="ReactModalBody-footer" style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-around', padding: '20px'}}>
             <button onClick={handleLeaveRoom}>Leave Room</button>
-            <button>Play Again</button>
           </div>
       </div>
     </ReactModal>
@@ -284,13 +242,13 @@ function Game({socket}) {
       style={{display: "block", overlay: {backgroundColor: "rgba(173,173,173,.5)"}}}>
           <div>
               <div className="ReactModalBody-header">
-                  <h2 class="modal-title">Joining Room</h2>
+                  <h2 className="modal-title">Joining Room</h2>
               </div>
               <div className="ReactModalBody">
                   <form style={{marginTop:"5%"}} 
                     onSubmit={(event)=>{
                       event.preventDefault();
-                      let username = document.getElementById("userName").value
+                      const username = document.getElementById("userName").value
                       localStorage.setItem("userName", username)
                       setUserName(username)
                       socket.emit("join-room", username, roomId)
@@ -318,11 +276,13 @@ function Game({socket}) {
       {startTime !== undefined && <Counter time={startTime} />}
       <div className='Sudoku-frame'>
         <div className='Game-options'>
-          <button onClick={() => {
-            notesMode = !notesMode
+          <button style={notesMode ? {background: "grey"} : {background: "white"}}
+          onClick={() => {
+            setNotesMode(!notesMode)
+            notesEnabled = !notesEnabled
           }}>Enable Notes</button>
           <button onClick={() => {
-            setGameOver(true)
+            setInviting(true)
           }}>Invite</button>
         </div>
         <div className='Sudoku-container'>

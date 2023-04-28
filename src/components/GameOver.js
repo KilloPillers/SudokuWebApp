@@ -7,7 +7,7 @@ const GameOver = ({roomId}) => {
 
     useEffect(()=>{
         async function fetchScore() {
-            await axios.get(`http://localhost:3000/userData/${roomId}`)
+            await axios.get(process.env.REACT_APP_NODE_SERVER+`/userData/${roomId}`)
             .then(response => {
                 const updatedUsers = {}
                 const usrs = response.data

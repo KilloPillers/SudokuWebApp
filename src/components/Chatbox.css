@@ -63,7 +63,12 @@
 }
 
 .form > input {
-  font-size: 10px
+  font-size: 15px
+}
+
+.form > button {
+  margin-left: 5px;
+  font-size: 12px
 }
 
 .message {
